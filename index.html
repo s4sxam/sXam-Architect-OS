@@ -1,0 +1,299 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Architect OS | Google Badass Edition</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="logo.png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --g-blue: #4285F4; --g-red: #EA4335; --g-yellow: #FBBC05; --g-green: #34A853;
+            --bg: #000000; --card: #121212; --text: #e8eaed; --primary: #00e676;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+            margin: 0; padding: 0; overflow-x: hidden;
+        }
+
+        /* --- Identity Setup (Badass Popup) --- */
+        #onboarding {
+            position: fixed; inset: 0; background: var(--bg); z-index: 10000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 40px; animation: fadeIn 0.8s ease;
+        }
+        #onboarding h1 { font-family: 'Lexend'; font-size: 32px; font-weight: 900; background: linear-gradient(45deg, var(--g-blue), var(--g-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #onboarding input {
+            background: #1a1a1a; border: 2px solid #333; color: white; padding: 18px;
+            border-radius: 20px; width: 85%; max-width: 350px; font-size: 18px; margin-top: 25px; outline: none; transition: 0.3s;
+        }
+        #onboarding input:focus { border-color: var(--g-blue); box-shadow: 0 0 15px rgba(66, 133, 244, 0.3); }
+        .btn-init { background: var(--g-blue); color: white; border: none; padding: 16px 50px; border-radius: 50px; font-weight: 900; margin-top: 30px; cursor: pointer; letter-spacing: 1px; }
+
+        /* --- Modern Header --- */
+        header { padding: 40px 25px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .brand h1 { font-family: 'Lexend'; font-size: 22px; margin: 0; letter-spacing: -0.5px; }
+        .brand p { font-size: 11px; color: #555; margin-top: 5px; font-weight: 900; letter-spacing: 2px; }
+        
+        .p-glow { width: 55px; height: 55px; border-radius: 50%; padding: 2px; background: conic-gradient(var(--g-blue), var(--g-green), var(--g-yellow), var(--g-red)); }
+        .p-glow img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #000; }
+
+        /* --- OS Tabs --- */
+        .tab-content { display: none; padding: 10px 25px 120px; animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .active-tab { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Minimal Progress --- */
+        .progress-circle { position: relative; width: 150px; height: 150px; margin: 30px auto; }
+        .circle-svg { transform: rotate(-90deg); }
+        .ring-bg { fill: none; stroke: #111; stroke-width: 8; }
+        .ring-bar {
+            fill: none; stroke: var(--g-green); stroke-width: 8; stroke-linecap: round;
+            stroke-dasharray: 440; stroke-dashoffset: 440; transition: 1.5s;
+        }
+        .pct-main { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .pct-main h2 { margin: 0; font-family: 'Lexend'; font-size: 32px; }
+
+        /* --- Google Style Cards --- */
+        .card-title { font-size: 11px; font-weight: 900; color: #444; letter-spacing: 2px; text-transform: uppercase; margin: 30px 0 15px; display: block; }
+        .task-card {
+            background: #0f0f0f; border: 1px solid #1a1a1a;
+            padding: 18px; border-radius: 25px; margin-bottom: 12px;
+            display: flex; align-items: center; transition: 0.3s;
+        }
+        .task-card.checked { background: rgba(52, 168, 83, 0.05); border-color: rgba(52, 168, 83, 0.2); }
+        .task-card label { flex: 1; margin-left: 15px; font-size: 15px; font-weight: 500; cursor: pointer; }
+        input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--g-green); }
+
+        /* --- Google AI Chat --- */
+        .ai-chat { height: 55vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .ai-msg { background: #1a1a1a; padding: 18px; border-radius: 25px 25px 25px 5px; font-size: 14px; line-height: 1.6; max-width: 85%; color: #ccc; }
+        .user-msg { background: var(--g-blue); color: white; padding: 14px 20px; border-radius: 25px 25px 5px 25px; align-self: flex-end; font-size: 14px; font-weight: 600; }
+        .chat-bar { display: flex; gap: 10px; background: #111; padding: 12px 25px; border-radius: 50px; border: 1px solid #222; margin-top: 20px; }
+        .chat-bar input { background: transparent; border: none; color: white; flex: 1; outline: none; font-size: 16px; }
+
+        /* --- Navigation --- */
+        .bottom-dock {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(25px);
+            padding: 15px 40px; border-radius: 50px; display: flex; gap: 45px; border: 1px solid #222; z-index: 1000;
+        }
+        .bottom-dock i { font-size: 24px; color: #444; transition: 0.3s; }
+        .bottom-dock i.active { color: var(--g-blue); text-shadow: 0 0 10px var(--g-blue); }
+
+        /* --- Battlefield Calendar --- */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .cal-day { height: 45px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; border: 1px solid transparent; }
+        .cal-day.green { background: var(--g-green) !important; color: black; box-shadow: 0 0 15px var(--g-green); }
+        .cal-day.red { background: var(--g-red) !important; color: white; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Badass Setup Modal -->
+    <div id="onboarding">
+        <i class="fas fa-shield-halved" style="font-size: 50px; color: var(--g-blue); margin-bottom: 20px;"></i>
+        <h1>ARCHITECT ACCESS</h1>
+        <p style="color: #555;">Enter your Nickname to sync with Mainframe</p>
+        <input type="text" id="nick-field" placeholder="Enter Nickname...">
+        <button class="btn-init" onclick="initOS()">ACCESS SYSTEM</button>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <h1 id="display-nick">ARCHITECT</h1>
+            <p id="display-date">MONDAY, JAN 05</p>
+        </div>
+        <div class="p-glow">
+            <img src="https://via.placeholder.com/60" id="user-avatar">
+        </div>
+    </header>
+
+    <main>
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active-tab">
+            <div class="progress-circle">
+                <svg width="150" height="150" class="circle-svg">
+                    <circle cx="75" cy="75" r="70" class="ring-bg"></circle>
+                    <circle id="ring-progress" cx="75" cy="75" r="70" class="ring-bar"></circle>
+                </svg>
+                <div class="pct-main">
+                    <h2 id="pct-text">0%</h2>
+                    <span style="font-size: 8px; letter-spacing: 2px; color: #555; font-weight: 900;">SYNCED</span>
+                </div>
+            </div>
+
+            <span class="card-title">Live Protocols</span>
+            <div id="task-container">
+                <!-- Tasks loaded by JS -->
+            </div>
+        </div>
+
+        <!-- Battlefield Tab -->
+        <div id="battlefield" class="tab-content">
+            <span class="card-title">Discipline Battlefield</span>
+            <div class="cal-grid" id="cal-grid"></div>
+            <div style="text-align: center; margin-top: 40px;">
+                <p style="font-size: 12px; color: #444; font-weight: 900;">STREAK: <span id="streak-num" style="color: var(--g-green);">0</span> DAYS</p>
+            </div>
+        </div>
+
+        <!-- AI Tab -->
+        <div id="ai" class="tab-content">
+            <span class="card-title">Google AI Mainframe</span>
+            <div class="ai-chat" id="chat-box">
+                <div class="ai-msg">Welcome Architect. I'm connected to Google's Health Engine. Ready to optimize your skin recovery? 🚀</div>
+            </div>
+            <div class="chat-bar">
+                <input type="text" id="ai-input" placeholder="Type a command...">
+                <button onclick="talkToAI()" style="background:transparent; border:none; color:var(--g-blue); font-size: 20px;"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Dock -->
+    <nav class="bottom-dock">
+        <i class="fas fa-grid-2 active" onclick="changeTab('dashboard', this)"></i>
+        <i class="fas fa-calendar-alt" onclick="changeTab('battlefield', this)"></i>
+        <i class="fas fa-bolt-lightning" onclick="changeTab('ai', this)"></i>
+    </nav>
+
+    <script>
+        const tasks = [
+            { id: 'm1', text: 'Icy Face Wash 🧼', time: 'morning' },
+            { id: 'm2', text: 'SPF Shield ☀️', time: 'morning' },
+            { id: 'l1', text: '3.5L Hydration 💧', time: 'always' },
+            { id: 'n1', text: 'Double Cleansing 🧴', time: 'night' },
+            { id: 'n2', text: 'Niacinamide Serum ✨', time: 'night' }
+        ];
+
+        function initOS() {
+            const name = document.getElementById('nick-field').value;
+            if(!name) return;
+            localStorage.setItem('v7_nick', name.toUpperCase());
+            document.getElementById('onboarding').style.display = 'none';
+            confetti({ particleCount: 150, spread: 70 });
+            location.reload(); // Refresh to set state
+        }
+
+        function changeTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
+            document.querySelectorAll('.bottom-dock i').forEach(i => i.classList.remove('active'));
+            document.getElementById(id).classList.add('active-tab');
+            el.classList.add('active');
+            if(id === 'battlefield') renderCalendar();
+        }
+
+        function renderTasks() {
+            const hr = new Date().getHours();
+            const container = document.getElementById('task-container');
+            container.innerHTML = '';
+
+            tasks.forEach(t => {
+                if(t.time !== 'always') {
+                    if(hr >= 14 && t.time === 'morning') return;
+                    if(hr < 14 && t.time === 'night') return;
+                }
+                const done = localStorage.getItem('v7_task_'+t.id) === 'true';
+                container.innerHTML += `
+                    <div class="task-card ${done ? 'checked' : ''}">
+                        <input type="checkbox" id="${t.id}" ${done ? 'checked' : ''} onchange="toggleTask('${t.id}')">
+                        <label for="${t.id}">${t.text}</label>
+                    </div>
+                `;
+            });
+            updateProgress();
+        }
+
+        function toggleTask(id) {
+            const status = document.getElementById(id).checked;
+            localStorage.setItem('v7_task_'+id, status);
+            renderTasks();
+        }
+
+        function updateProgress() {
+            let done = 0;
+            tasks.forEach(t => { if(localStorage.getItem('v7_task_'+t.id) === 'true') done++; });
+            const pct = Math.round((done / tasks.length) * 100);
+            document.getElementById('ring-progress').style.strokeDashoffset = 440 - (440 * pct) / 100;
+            document.getElementById('pct-text').innerText = pct + "%";
+
+            if(pct === 100 && localStorage.getItem('v7_done_today') !== new Date().toDateString()) {
+                localStorage.setItem('v7_done_today', new Date().toDateString());
+                let s = parseInt(localStorage.getItem('v7_streak') || 0) + 1;
+                localStorage.setItem('v7_streak', s);
+                saveHistory('green');
+                confetti({ particleCount: 200, spread: 80 });
+            }
+        }
+
+        function saveHistory(color) {
+            let history = JSON.parse(localStorage.getItem('v7_history') || "{}");
+            history[new Date().toDateString()] = color;
+            localStorage.setItem('v7_history', JSON.stringify(history));
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('cal-grid');
+            grid.innerHTML = '';
+            const history = JSON.parse(localStorage.getItem('v7_history') || "{}");
+            for(let i=1; i<=31; i++) {
+                const d = new Date(2026, 0, i);
+                const dStr = d.toDateString();
+                const day = document.createElement('div');
+                day.className = 'cal-day';
+                if(history[dStr]) day.classList.add(history[dStr]);
+                else if (d < new Date().setHours(0,0,0,0)) day.classList.add('red');
+                day.innerText = i;
+                grid.appendChild(day);
+            }
+            document.getElementById('streak-num').innerText = localStorage.getItem('v7_streak') || 0;
+        }
+
+        function talkToAI() {
+            const input = document.getElementById('ai-input');
+            const box = document.getElementById('chat-box');
+            if(!input.value) return;
+            box.innerHTML += `<div class="user-msg">${input.value}</div>`;
+            const q = input.value.toLowerCase();
+            input.value = '';
+            setTimeout(() => {
+                let res = "Mainframe Analysis: Discipline levels are rising. Based on your profile, recovery is 15% faster today! ⚡";
+                if(q.includes('acne')) res = "AI Warning: Do not touch spots. Use a clean towel and apply Niacinamide before sleep.";
+                box.innerHTML += `<div class="ai-msg">${res}</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 600);
+        }
+
+        window.onload = () => {if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js');
+            }
+            const nick = localStorage.getItem('v7_nick');
+            if(!nick) document.getElementById('onboarding').style.display = 'flex';
+            else {
+                document.getElementById('display-nick').innerText = nick + " ARCHITECT";
+                document.getElementById('display-date').innerText = new Date().toDateString().toUpperCase();
+                
+                // Auto Reset Logic
+                const lastVisit = localStorage.getItem('v7_visit');
+                if(lastVisit && lastVisit !== new Date().toDateString()) {
+                    if(localStorage.getItem('v7_done_today') !== lastVisit) saveHistory('red');
+                    tasks.forEach(t => localStorage.setItem('v7_task_'+t.id, 'false'));
+                }
+                localStorage.setItem('v7_visit', new Date().toDateString());
+                renderTasks();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,2 +1,14 @@
 # sXam-Architect-OS
-"A premium Progressive Web App (PWA) built for self-discipline and skin health monitoring. Features include a Google-style UI, time-sensitive protocol cards, an AI Architect assistant, and a persistent battlefield calendar."
+# 🏛️ sXam Architect OS v7
+**Architect your life. Master your discipline.**
+
+sXam OS is not just a website; it's a personal performance mainframe designed to track skin recovery protocols and daily habits with military precision.
+
+### ✨ Features
+- 📱 **PWA Ready:** Install it directly on your Mobile or PC as a standalone app.
+- 🕒 **Time-Aware OS:** Dynamic task switching based on Morning/Night cycles.
+- 🤖 **AI Architect:** Integrated AI Assistant for health and recovery optimization.
+- 📅 **Battlefield Calendar:** Visual consistency tracking (Green/Red logic).
+- 🎨 **Google UI:** Minimalist typography and sleek, dark-mode aesthetics.
+
+**Designed & Developed by Tanay (@s4sxam)**

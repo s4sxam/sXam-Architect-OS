@@ -3,212 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Architect OS | Google Badass Edition</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" href="logo.png">
+    <title>Architect OS v10 | The Encyclopedia</title>
     
-    <!-- Fonts & Icons -->
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --g-blue: #4285F4; --g-red: #EA4335; --g-yellow: #FBBC05; --g-green: #34A853;
-            --bg: #000000; --card: #121212; --text: #e8eaed; --primary: #00e676;
+            --bg: #000; --card: #0d0d0d; --text: #f1f3f4; --border: #1a1a1a;
+            --glass: rgba(255, 255, 255, 0.03);
         }
 
-        body {
+        body, html {
             font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
-            margin: 0; padding: 0; overflow-x: hidden;
+            margin: 0; padding: 0; overflow: hidden; height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- Identity Setup (Badass Popup) --- */
-        #onboarding {
-            position: fixed; inset: 0; background: var(--bg); z-index: 10000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 40px; animation: fadeIn 0.8s ease;
+        /* --- SPLASH SCREEN --- */
+        #splash {
+            position: fixed; inset: 0; background: #000; z-index: 20000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        #onboarding h1 { font-family: 'Lexend'; font-size: 32px; font-weight: 900; background: linear-gradient(45deg, var(--g-blue), var(--g-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        #onboarding input {
-            background: #1a1a1a; border: 2px solid #333; color: white; padding: 18px;
-            border-radius: 20px; width: 85%; max-width: 350px; font-size: 18px; margin-top: 25px; outline: none; transition: 0.3s;
-        }
-        #onboarding input:focus { border-color: var(--g-blue); box-shadow: 0 0 15px rgba(66, 133, 244, 0.3); }
-        .btn-init { background: var(--g-blue); color: white; border: none; padding: 16px 50px; border-radius: 50px; font-weight: 900; margin-top: 30px; cursor: pointer; letter-spacing: 1px; }
+        .splash-logo { font-family: 'Lexend'; font-size: 50px; font-weight: 900; color: var(--g-blue); animation: zoomPulse 1.5s infinite alternate; }
+        @keyframes zoomPulse { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1.1); opacity: 1; } }
 
-        /* --- Modern Header --- */
-        header { padding: 40px 25px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .brand h1 { font-family: 'Lexend'; font-size: 22px; margin: 0; letter-spacing: -0.5px; }
-        .brand p { font-size: 11px; color: #555; margin-top: 5px; font-weight: 900; letter-spacing: 2px; }
+        /* --- HEADER --- */
+        header {
+            padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { font-family: 'Lexend'; font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+        .logo span { color: var(--g-blue); }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .h-btn { width: 38px; height: 38px; background: #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; color: #888; }
+        .h-btn:active { background: var(--g-blue); color: #fff; transform: scale(0.9); }
         
-        .p-glow { width: 55px; height: 55px; border-radius: 50%; padding: 2px; background: conic-gradient(var(--g-blue), var(--g-green), var(--g-yellow), var(--g-red)); }
-        .p-glow img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #000; }
+        .avatar-box { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--g-green); display: flex; align-items: center; justify-content: center; background: #111; overflow: hidden; font-weight: 900; color: var(--g-green); font-size: 14px; position: relative; }
+        #p-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
 
-        /* --- OS Tabs --- */
-        .tab-content { display: none; padding: 10px 25px 120px; animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .active-tab { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- CONTENT AREA --- */
+        .tab-content { display: none; padding: 20px; height: calc(100vh - 160px); overflow-y: auto; scrollbar-width: none; }
+        .tab-content::-webkit-scrollbar { display: none; }
+        .active-tab { display: block; animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* --- Minimal Progress --- */
-        .progress-circle { position: relative; width: 150px; height: 150px; margin: 30px auto; }
-        .circle-svg { transform: rotate(-90deg); }
-        .ring-bg { fill: none; stroke: #111; stroke-width: 8; }
-        .ring-bar {
-            fill: none; stroke: var(--g-green); stroke-width: 8; stroke-linecap: round;
-            stroke-dasharray: 440; stroke-dashoffset: 440; transition: 1.5s;
+        /* --- DASHBOARD --- */
+        .mission-timer {
+            background: linear-gradient(145deg, #0f0f0f, #050505); padding: 35px 20px;
+            border-radius: 35px; border: 1px solid var(--border); text-align: center; margin-bottom: 25px;
         }
-        .pct-main { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-        .pct-main h2 { margin: 0; font-family: 'Lexend'; font-size: 32px; }
+        #timer-clock { font-family: 'Lexend'; font-size: 52px; font-weight: 900; color: #fff; letter-spacing: -2px; }
+        .timer-label { font-size: 10px; letter-spacing: 3px; color: #555; font-weight: 900; margin-bottom: 5px; }
 
-        /* --- Google Style Cards --- */
-        .card-title { font-size: 11px; font-weight: 900; color: #444; letter-spacing: 2px; text-transform: uppercase; margin: 30px 0 15px; display: block; }
-        .task-card {
-            background: #0f0f0f; border: 1px solid #1a1a1a;
-            padding: 18px; border-radius: 25px; margin-bottom: 12px;
-            display: flex; align-items: center; transition: 0.3s;
+        .progress-card { background: var(--card); padding: 25px; border-radius: 30px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border); position: relative; }
+        .ring-bar { fill: none; stroke: var(--g-green); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 377; stroke-dashoffset: 377; transition: 1.5s ease-out; filter: drop-shadow(0 0 8px var(--g-green)); }
+        .pct-text { font-family: 'Lexend'; font-size: 28px; font-weight: 900; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        /* --- TASKS --- */
+        .task-row {
+            display: flex; align-items: center; padding: 18px; background: #111; 
+            border-radius: 22px; margin-bottom: 12px; border: 1px solid var(--border); transition: 0.3s;
         }
-        .task-card.checked { background: rgba(52, 168, 83, 0.05); border-color: rgba(52, 168, 83, 0.2); }
-        .task-card label { flex: 1; margin-left: 15px; font-size: 15px; font-weight: 500; cursor: pointer; }
-        input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--g-green); }
+        .task-row.checked { background: rgba(52, 168, 83, 0.05); border-color: rgba(52, 168, 83, 0.3); }
+        input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--g-green); cursor: pointer; }
 
-        /* --- Google AI Chat --- */
-        .ai-chat { height: 55vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .ai-msg { background: #1a1a1a; padding: 18px; border-radius: 25px 25px 25px 5px; font-size: 14px; line-height: 1.6; max-width: 85%; color: #ccc; }
-        .user-msg { background: var(--g-blue); color: white; padding: 14px 20px; border-radius: 25px 25px 5px 25px; align-self: flex-end; font-size: 14px; font-weight: 600; }
-        .chat-bar { display: flex; gap: 10px; background: #111; padding: 12px 25px; border-radius: 50px; border: 1px solid #222; margin-top: 20px; }
-        .chat-bar input { background: transparent; border: none; color: white; flex: 1; outline: none; font-size: 16px; }
-
-        /* --- Navigation --- */
-        .bottom-dock {
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(25px);
-            padding: 15px 40px; border-radius: 50px; display: flex; gap: 45px; border: 1px solid #222; z-index: 1000;
+        /* --- DOCK --- */
+        .dock {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(15,15,15,0.85); backdrop-filter: blur(30px);
+            padding: 12px 40px; border-radius: 50px; display: flex; gap: 45px; border: 1px solid #222; z-index: 1000;
         }
-        .bottom-dock i { font-size: 24px; color: #444; transition: 0.3s; }
-        .bottom-dock i.active { color: var(--g-blue); text-shadow: 0 0 10px var(--g-blue); }
+        .dock i { font-size: 22px; color: #444; transition: 0.3s; cursor: pointer; }
+        .dock i.active { color: var(--g-blue); text-shadow: 0 0 15px var(--g-blue); }
 
-        /* --- Battlefield Calendar --- */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-        .cal-day { height: 45px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; border: 1px solid transparent; }
-        .cal-day.green { background: var(--g-green) !important; color: black; box-shadow: 0 0 15px var(--g-green); }
-        .cal-day.red { background: var(--g-red) !important; color: white; }
+        /* --- CALENDAR --- */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .day { height: 40px; background: #111; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; border: 1px solid transparent; }
+        .day.green { background: var(--g-green) !important; color: black; box-shadow: 0 0 15px rgba(52, 168, 83, 0.4); }
+        .day.red { border-color: var(--g-red); color: var(--g-red); opacity: 0.6; }
+        .day.today { border: 2px solid var(--g-blue); }
 
+        /* --- SEARCH & DETAIL OVERLAYS --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 5000; display: none; padding: 30px; backdrop-filter: blur(15px); overflow-y: auto; }
+        .search-input { width: 100%; background: #111; border: 1px solid #333; color: white; padding: 18px; border-radius: 20px; font-size: 18px; outline: none; margin-top: 20px; font-family: 'Inter'; }
+        
+        .protocol-card { background: #111; padding: 20px; border-radius: 22px; margin-bottom: 15px; border-left: 5px solid var(--g-blue); cursor: pointer; transition: 0.3s; }
+        .protocol-card:active { transform: scale(0.97); }
+
+        .detail-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .detail-body h3 { color: var(--g-blue); font-family: 'Lexend'; margin-top: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .detail-body p { line-height: 1.6; color: #aaa; font-size: 15px; }
+        .benefit-tag { display: inline-block; background: rgba(66, 133, 244, 0.1); color: var(--g-blue); padding: 5px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; margin-right: 8px; margin-top: 10px; }
+
+        /* Setup Modal */
+        #onboarding { position: fixed; inset:0; background:#000; z-index:15000; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; }
+        .btn-go { background: var(--g-blue); color: #fff; border: none; padding: 15px 50px; border-radius: 50px; margin-top: 30px; font-weight: 900; letter-spacing: 1px; cursor: pointer; }
+
+        .watermark { text-align: center; font-size: 10px; letter-spacing: 8px; color: #222; font-weight: 900; margin-top: 50px; text-transform: uppercase; padding-bottom: 100px; }
     </style>
 </head>
 <body>
 
-    <!-- Badass Setup Modal -->
+    <!-- Splash Screen -->
+    <div id="splash">
+        <div class="splash-logo">sXam</div>
+        <p class="timer-label" style="color: #444;">ARCHITECT OS v10</p>
+    </div>
+
+    <!-- Nickname Setup -->
     <div id="onboarding">
-        <i class="fas fa-shield-halved" style="font-size: 50px; color: var(--g-blue); margin-bottom: 20px;"></i>
-        <h1>ARCHITECT ACCESS</h1>
-        <p style="color: #555;">Enter your Nickname to sync with Mainframe</p>
-        <input type="text" id="nick-field" placeholder="Enter Nickname...">
-        <button class="btn-init" onclick="initOS()">ACCESS SYSTEM</button>
+        <h1 style="font-family:'Lexend'; color: var(--g-blue);">Architect Initialized</h1>
+        <p style="color:#555">Identity needed for Mainframe sync</p>
+        <input type="text" id="nick-input" placeholder="Architect Nickname..." class="search-input" style="text-align:center;">
+        <button class="btn-go" onclick="saveIdentity()">SYNC DATA</button>
+    </div>
+
+    <!-- Search Overlay -->
+    <div id="search-overlay" class="overlay">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-family:'Lexend'; margin:0">Discovery</h2>
+            <div class="h-btn" onclick="toggleSearch(false)"><i class="fas fa-times"></i></div>
+        </div>
+        <input type="text" id="search-box" placeholder="Search protocol (e.g. Water, SPF)..." class="search-input" oninput="doSearch(this.value)">
+        <div id="search-results" style="margin-top:25px;"></div>
+    </div>
+
+    <!-- Detail Deep Dive Overlay -->
+    <div id="detail-overlay" class="overlay">
+        <div class="h-btn" onclick="closeDetail()" style="margin-bottom: 20px;"><i class="fas fa-arrow-left"></i></div>
+        <div id="detail-content"></div>
     </div>
 
     <!-- Header -->
     <header>
-        <div class="brand">
-            <h1 id="display-nick">ARCHITECT</h1>
-            <p id="display-date">MONDAY, JAN 05</p>
-        </div>
-        <div class="p-glow">
-            <img src="https://via.placeholder.com/60" id="user-avatar">
+        <div class="logo">s<span>Xam</span></div>
+        <div class="header-actions">
+            <div class="h-btn" onclick="toggleSearch(true)"><i class="fas fa-search"></i></div>
+            <div class="h-btn" onclick="quickPlus()"><i class="fas fa-plus"></i></div>
+            <div class="avatar-box" onclick="document.getElementById('file-in').click()">
+                <span id="initials">A</span>
+                <img id="p-img" style="display:none">
+                <input type="file" id="file-in" style="display:none" onchange="handlePic(event)">
+            </div>
         </div>
     </header>
 
     <main>
-        <!-- Dashboard Tab -->
-        <div id="dashboard" class="tab-content active-tab">
-            <div class="progress-circle">
-                <svg width="150" height="150" class="circle-svg">
-                    <circle cx="75" cy="75" r="70" class="ring-bg"></circle>
-                    <circle id="ring-progress" cx="75" cy="75" r="70" class="ring-bar"></circle>
-                </svg>
-                <div class="pct-main">
-                    <h2 id="pct-text">0%</h2>
-                    <span style="font-size: 8px; letter-spacing: 2px; color: #555; font-weight: 900;">SYNCED</span>
+        <!-- Home Dashboard -->
+        <div id="home" class="tab-content active-tab">
+            <div class="mission-timer">
+                <div class="timer-label" id="m-status">NEXT MISSION</div>
+                <div id="timer-clock">00:00:00</div>
+                <div style="font-size: 11px; color: var(--g-blue); font-weight: 900; letter-spacing: 2px;" id="nick-display">ARCHITECT</div>
+            </div>
+
+            <div class="progress-card">
+                <div style="position:relative; width:120px; height:120px; margin:0 auto;">
+                    <svg width="120" height="120">
+                        <circle cx="60" cy="60" r="55" stroke="#1a1a1a" stroke-width="8" fill="none"></circle>
+                        <circle id="ring" cx="60" cy="60" r="55" class="ring-bar"></circle>
+                    </svg>
+                    <div class="pct-text" id="pct-val">0%</div>
                 </div>
             </div>
 
-            <span class="card-title">Live Protocols</span>
-            <div id="task-container">
-                <!-- Tasks loaded by JS -->
-            </div>
+            <div id="task-list"></div>
+            <div class="watermark">Architect OS v10</div>
         </div>
 
-        <!-- Battlefield Tab -->
-        <div id="battlefield" class="tab-content">
-            <span class="card-title">Discipline Battlefield</span>
-            <div class="cal-grid" id="cal-grid"></div>
-            <div style="text-align: center; margin-top: 40px;">
-                <p style="font-size: 12px; color: #444; font-weight: 900;">STREAK: <span id="streak-num" style="color: var(--g-green);">0</span> DAYS</p>
+        <!-- Battlefield (Calendar) -->
+        <div id="calendar" class="tab-content">
+            <div class="timer-label" style="margin-bottom:15px">DISCIPLINE BATTLEFIELD</div>
+            <div class="progress-card">
+                <div class="cal-grid" id="cal-grid"></div>
             </div>
+            <p style="text-align:center; font-size:12px; font-weight:900;">STREAK: <span id="streak" style="color:var(--g-green)">0</span> DAYS</p>
         </div>
 
-        <!-- AI Tab -->
-        <div id="ai" class="tab-content">
-            <span class="card-title">Google AI Mainframe</span>
-            <div class="ai-chat" id="chat-box">
-                <div class="ai-msg">Welcome Architect. I'm connected to Google's Health Engine. Ready to optimize your skin recovery? 🚀</div>
-            </div>
-            <div class="chat-bar">
-                <input type="text" id="ai-input" placeholder="Type a command...">
-                <button onclick="talkToAI()" style="background:transparent; border:none; color:var(--g-blue); font-size: 20px;"><i class="fas fa-paper-plane"></i></button>
-            </div>
+        <!-- Knowledge Library -->
+        <div id="library" class="tab-content">
+            <div class="timer-label" style="margin-bottom:15px">GORGEOUS PROTOCOLS</div>
+            <div id="lib-content"></div>
         </div>
     </main>
 
-    <!-- Bottom Dock -->
-    <nav class="bottom-dock">
-        <i class="fas fa-grid-2 active" onclick="changeTab('dashboard', this)"></i>
-        <i class="fas fa-calendar-alt" onclick="changeTab('battlefield', this)"></i>
-        <i class="fas fa-bolt-lightning" onclick="changeTab('ai', this)"></i>
+    <!-- Navigation Dock -->
+    <nav class="dock">
+        <i class="fas fa-home active" onclick="switchTab('home', this)"></i>
+        <i class="fas fa-calendar-alt" onclick="switchTab('calendar', this)"></i>
+        <i class="fas fa-book-open" onclick="switchTab('library', this)"></i>
     </nav>
 
     <script>
-        const tasks = [
-            { id: 'm1', text: 'Icy Face Wash 🧼', time: 'morning' },
-            { id: 'm2', text: 'SPF Shield ☀️', time: 'morning' },
-            { id: 'l1', text: '3.5L Hydration 💧', time: 'always' },
-            { id: 'n1', text: 'Double Cleansing 🧴', time: 'night' },
-            { id: 'n2', text: 'Niacinamide Serum ✨', time: 'night' }
+        // Deep Dive Knowledge Base
+        const protocols = [
+            {
+                t:'Drink 3L Water 💧', 
+                s:'Hydration is the engine of cellular skin repair.',
+                benefits: ['Flush Toxins', 'Natural Glow', 'Reduce Puffiness'],
+                science: 'Drinking water improves blood flow to the skin, which helps in delivering nutrients and oxygen to skin cells, resulting in a healthier complexion and faster healing of acne.',
+                instructions: 'Start with 500ml upon waking up. Use a marked bottle to track throughout the day.'
+            },
+            {
+                t:'Icy Face Wash 🧼', 
+                s:'Cold water tightens skin and boosts blood flow.',
+                benefits: ['Tightens Pores', 'Reduces Oil', 'Instant Awake'],
+                science: 'Cold exposure causes vasoconstriction, which helps reduce inflammation and redness. It also constricts pores, preventing dirt buildup.',
+                instructions: 'Use ice-cold water for 30 seconds every morning. Do not use harsh soaps immediately after.'
+            },
+            {
+                t:'SPF Protection ☀️', 
+                s:'Your primary shield against aging.',
+                benefits: ['Anti-Aging', 'No Dark Spots', 'DNA Protection'],
+                science: 'UV rays break down collagen and elastin. SPF creates a chemical or physical barrier that reflects or absorbs these rays before they damage the skin layers.',
+                instructions: 'Apply 2 fingers length of SPF 50+ even if it is cloudy or you are indoors.'
+            },
+            {
+                t:'Double Cleanse 🧴', 
+                s:'Deep decontamination of the facial canvas.',
+                benefits: ['Zero Clogs', 'Prevents Acne', 'Deep Clean'],
+                science: 'Oil-based cleansers break down sebum and waterproof SPF, while water-based cleansers remove sweat and bacteria. One wash is never enough.',
+                instructions: 'Step 1: Oil/Balm cleanser on dry skin. Step 2: Foaming cleanser on wet skin.'
+            }
         ];
 
-        function initOS() {
-            const name = document.getElementById('nick-field').value;
-            if(!name) return;
-            localStorage.setItem('v7_nick', name.toUpperCase());
-            document.getElementById('onboarding').style.display = 'none';
-            confetti({ particleCount: 150, spread: 70 });
-            location.reload(); // Refresh to set state
+        const tasks = [
+            {id:'m1', text:'Icy Face Wash 🧼', time:'morning'},
+            {id:'m2', text:'SPF Shield ☀️', time:'morning'},
+            {id:'l1', text:'3.5L Hydration 💧', time:'always'},
+            {id:'n1', text:'Double Cleansing 🧴', time:'night'},
+            {id:'n2', text:'Niacinamide Recovery ✨', time:'night'}
+        ];
+
+        // Startup Logic
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+            checkDailyReset();
+            if(!localStorage.getItem('v10_nick')) document.getElementById('onboarding').style.display = 'flex';
+            else setupUI();
+        }, 2000);
+
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            const lastVisit = localStorage.getItem('v10_last_visit');
+            if (lastVisit !== today) {
+                tasks.forEach(t => localStorage.removeItem('v10_task_' + t.id));
+                localStorage.setItem('v10_last_visit', today);
+            }
         }
 
-        function changeTab(id, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
-            document.querySelectorAll('.bottom-dock i').forEach(i => i.classList.remove('active'));
-            document.getElementById(id).classList.add('active-tab');
-            el.classList.add('active');
-            if(id === 'battlefield') renderCalendar();
+        function saveIdentity() {
+            const val = document.getElementById('nick-input').value;
+            if(!val) return;
+            localStorage.setItem('v10_nick', val.toUpperCase());
+            localStorage.setItem('v10_start', new Date().toDateString());
+            document.getElementById('onboarding').style.display = 'none';
+            confetti({ particleCount: 150 });
+            setupUI();
+        }
+
+        function runTimer() {
+            const now = new Date();
+            const hr = now.getHours();
+            let target = new Date();
+            if(hr < 5) target.setHours(5,0,0);
+            else if(hr < 14) target.setHours(14,0,0);
+            else { target.setDate(target.getDate()+1); target.setHours(5,0,0); }
+            const diff = target - now;
+            const h = Math.floor(diff/3600000).toString().padStart(2,'0');
+            const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+            const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
+            document.getElementById('timer-clock').innerText = `${h}:${m}:${s}`;
+            document.getElementById('m-status').innerText = (hr < 14 && hr >= 5) ? "NIGHT MISSION STARTS IN" : "MORNING MISSION STARTS IN";
+        }
+        setInterval(runTimer, 1000);
+
+        function setupUI() {
+            const nick = localStorage.getItem('v10_nick');
+            document.getElementById('nick-display').innerText = "ARCHITECT: " + nick;
+            document.getElementById('initials').innerText = nick[0];
+            updateAvatarDisplay();
+            renderTasks();
+            renderLibrary();
+        }
+
+        function updateAvatarDisplay() {
+            const imgData = localStorage.getItem('v10_img');
+            if(imgData) {
+                const imgEl = document.getElementById('p-img');
+                imgEl.src = imgData;
+                imgEl.style.display = 'block';
+                document.getElementById('initials').style.display = 'none';
+            }
+        }
+
+        function handlePic(e) {
+            const reader = new FileReader();
+            reader.onload = () => { 
+                localStorage.setItem('v10_img', reader.result); 
+                updateAvatarDisplay();
+                confetti({particleCount: 50});
+            };
+            reader.readAsDataURL(e.target.files[0]);
         }
 
         function renderTasks() {
             const hr = new Date().getHours();
-            const container = document.getElementById('task-container');
+            const container = document.getElementById('task-list');
             container.innerHTML = '';
-
             tasks.forEach(t => {
                 if(t.time !== 'always') {
                     if(hr >= 14 && t.time === 'morning') return;
                     if(hr < 14 && t.time === 'night') return;
                 }
-                const done = localStorage.getItem('v7_task_'+t.id) === 'true';
+                const done = localStorage.getItem('v10_task_'+t.id) === 'true';
                 container.innerHTML += `
-                    <div class="task-card ${done ? 'checked' : ''}">
-                        <input type="checkbox" id="${t.id}" ${done ? 'checked' : ''} onchange="toggleTask('${t.id}')">
-                        <label for="${t.id}">${t.text}</label>
+                    <div class="task-row ${done?'checked':''}">
+                        <input type="checkbox" id="${t.id}" ${done?'checked':''} onchange="toggleTask('${t.id}')">
+                        <label for="${t.id}" style="margin-left:15px; flex:1; cursor:pointer; font-weight:600;">${t.text}</label>
                     </div>
                 `;
             });
@@ -216,84 +333,129 @@
         }
 
         function toggleTask(id) {
-            const status = document.getElementById(id).checked;
-            localStorage.setItem('v7_task_'+id, status);
+            localStorage.setItem('v10_task_'+id, document.getElementById(id).checked);
             renderTasks();
         }
 
         function updateProgress() {
+            const hr = new Date().getHours();
+            const visibleTasks = tasks.filter(t => (t.time === 'always') || (hr < 14 && t.time === 'morning') || (hr >= 14 && t.time === 'night'));
             let done = 0;
-            tasks.forEach(t => { if(localStorage.getItem('v7_task_'+t.id) === 'true') done++; });
-            const pct = Math.round((done / tasks.length) * 100);
-            document.getElementById('ring-progress').style.strokeDashoffset = 440 - (440 * pct) / 100;
-            document.getElementById('pct-text').innerText = pct + "%";
-
-            if(pct === 100 && localStorage.getItem('v7_done_today') !== new Date().toDateString()) {
-                localStorage.setItem('v7_done_today', new Date().toDateString());
-                let s = parseInt(localStorage.getItem('v7_streak') || 0) + 1;
-                localStorage.setItem('v7_streak', s);
-                saveHistory('green');
+            visibleTasks.forEach(t => { if(localStorage.getItem('v10_task_'+t.id) === 'true') done++; });
+            const pct = Math.round((done / visibleTasks.length) * 100) || 0;
+            document.getElementById('ring').style.strokeDashoffset = 377 - (377 * pct) / 100;
+            document.getElementById('pct-val').innerText = pct + "%";
+            if(pct === 100 && localStorage.getItem('v10_done_today') !== new Date().toDateString()) {
+                localStorage.setItem('v10_done_today', new Date().toDateString());
+                markDay('green', new Date().toDateString());
                 confetti({ particleCount: 200, spread: 80 });
             }
         }
 
-        function saveHistory(color) {
-            let history = JSON.parse(localStorage.getItem('v7_history') || "{}");
-            history[new Date().toDateString()] = color;
-            localStorage.setItem('v7_history', JSON.stringify(history));
+        function markDay(status, dateStr) {
+            let history = JSON.parse(localStorage.getItem('v10_history') || "{}");
+            history[dateStr] = status;
+            localStorage.setItem('v10_history', JSON.stringify(history));
+            updateStreak(history);
+        }
+
+        function updateStreak(history) {
+            let streak = 0;
+            let d = new Date();
+            while(history[d.toDateString()] === 'green') { streak++; d.setDate(d.getDate()-1); }
+            localStorage.setItem('v10_streak', streak);
+            document.getElementById('streak').innerText = streak;
         }
 
         function renderCalendar() {
-            const grid = document.getElementById('cal-grid');
-            grid.innerHTML = '';
-            const history = JSON.parse(localStorage.getItem('v7_history') || "{}");
-            for(let i=1; i<=31; i++) {
-                const d = new Date(2026, 0, i);
-                const dStr = d.toDateString();
+            const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const history = JSON.parse(localStorage.getItem('v10_history') || "{}");
+            const start = new Date(localStorage.getItem('v10_start'));
+
+            for(let i=1; i<=daysInMonth; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth(), i);
                 const day = document.createElement('div');
-                day.className = 'cal-day';
-                if(history[dStr]) day.classList.add(history[dStr]);
-                else if (d < new Date().setHours(0,0,0,0)) day.classList.add('red');
+                day.className = 'day';
+                const ds = d.toDateString();
+                if(history[ds]) day.classList.add('green');
+                else if (d < new Date().setHours(0,0,0,0) && d >= start) day.classList.add('red');
+                if(ds === new Date().toDateString()) day.classList.add('today');
                 day.innerText = i;
                 grid.appendChild(day);
             }
-            document.getElementById('streak-num').innerText = localStorage.getItem('v7_streak') || 0;
+            document.getElementById('streak').innerText = localStorage.getItem('v10_streak') || 0;
         }
 
-        function talkToAI() {
-            const input = document.getElementById('ai-input');
-            const box = document.getElementById('chat-box');
-            if(!input.value) return;
-            box.innerHTML += `<div class="user-msg">${input.value}</div>`;
-            const q = input.value.toLowerCase();
-            input.value = '';
-            setTimeout(() => {
-                let res = "Mainframe Analysis: Discipline levels are rising. Based on your profile, recovery is 15% faster today! ⚡";
-                if(q.includes('acne')) res = "AI Warning: Do not touch spots. Use a clean towel and apply Niacinamide before sleep.";
-                box.innerHTML += `<div class="ai-msg">${res}</div>`;
-                box.scrollTop = box.scrollHeight;
-            }, 600);
+        function switchTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
+            document.querySelectorAll('.dock i').forEach(i => i.classList.remove('active'));
+            document.getElementById(id).classList.add('active-tab');
+            el.classList.add('active');
+            if(id === 'calendar') renderCalendar();
+            if(id === 'library') renderLibrary();
         }
 
-        window.onload = () => {if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js');
-            }
-            const nick = localStorage.getItem('v7_nick');
-            if(!nick) document.getElementById('onboarding').style.display = 'flex';
-            else {
-                document.getElementById('display-nick').innerText = nick + " ARCHITECT";
-                document.getElementById('display-date').innerText = new Date().toDateString().toUpperCase();
-                
-                // Auto Reset Logic
-                const lastVisit = localStorage.getItem('v7_visit');
-                if(lastVisit && lastVisit !== new Date().toDateString()) {
-                    if(localStorage.getItem('v7_done_today') !== lastVisit) saveHistory('red');
-                    tasks.forEach(t => localStorage.setItem('v7_task_'+t.id, 'false'));
-                }
-                localStorage.setItem('v7_visit', new Date().toDateString());
-                renderTasks();
-            }
-        };
+        // Search & Deep Dive Logic
+        function toggleSearch(show) { 
+            document.getElementById('search-overlay').style.display = show ? 'block' : 'none'; 
+            if(show) document.getElementById('search-box').focus();
+        }
+
+        function doSearch(q) {
+            const res = document.getElementById('search-results');
+            if(!q) { res.innerHTML = ''; return; }
+            res.innerHTML = protocols.filter(p => p.t.toLowerCase().includes(q.toLowerCase()))
+                .map((p, idx) => `
+                    <div class="protocol-card" onclick="openDetail('${p.t}')">
+                        <div style="font-weight:900;">${p.t}</div>
+                        <div style="font-size:12px; color:#666; margin-top:5px;">${p.s}</div>
+                    </div>
+                `).join('');
+        }
+
+        function openDetail(title) {
+            const p = protocols.find(x => x.t === title);
+            const content = document.getElementById('detail-content');
+            content.innerHTML = `
+                <div class="detail-header">
+                    <h1 style="font-family:'Lexend'; margin:0; font-size:28px;">${p.t}</h1>
+                </div>
+                <div class="detail-body">
+                    <h3>The Benefits</h3>
+                    <div>${p.benefits.map(b => `<span class="benefit-tag">${b}</span>`).join('')}</div>
+                    
+                    <h3>The Science</h3>
+                    <p>${p.science}</p>
+                    
+                    <h3>Architect's Instruction</h3>
+                    <p>${p.instructions}</p>
+                    
+                    <button class="btn-go" onclick="closeDetail()" style="width:100%">PROTOCOL UNDERSTOOD</button>
+                </div>
+            `;
+            document.getElementById('detail-overlay').style.display = 'block';
+        }
+
+        function closeDetail() { document.getElementById('detail-overlay').style.display = 'none'; }
+        
+        function renderLibrary() {
+            const container = document.getElementById('lib-content');
+            container.innerHTML = protocols.map(p => `
+                <div class="protocol-card" onclick="openDetail('${p.t}')">
+                    <h4 style="margin:0; font-family:'Lexend'; color:var(--g-blue)">${p.t}</h4>
+                    <p style="margin:8px 0 0; font-size:13px; color:#888;">${p.s}</p>
+                </div>
+            `).join('') + `<div class="watermark">v10 Knowledge Vault</div>`;
+        }
+
+        function quickPlus() { 
+            alert("Architect OS: 1 Glass of Water Logged! 💧"); 
+            confetti({particleCount:40, colors: ['#4285F4']}); 
+        }
+
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
     </script>
 </body>
 </html>

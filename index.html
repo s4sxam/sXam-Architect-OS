@@ -1,461 +1,339 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Architect OS v10 | The Encyclopedia</title>
+    <title>Architect OS v21 | Absolute Victory</title>
     
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --g-blue: #4285F4; --g-red: #EA4335; --g-yellow: #FBBC05; --g-green: #34A853;
-            --bg: #000; --card: #0d0d0d; --text: #f1f3f4; --border: #1a1a1a;
-            --glass: rgba(255, 255, 255, 0.03);
+            --accent: #4285F4; --bg: #000; --card: #0d0d0d; --text: #f1f3f4;
+            --border: rgba(255, 255, 255, 0.1); --glass: rgba(255, 255, 255, 0.03);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body, html {
             font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
-            margin: 0; padding: 0; overflow: hidden; height: 100vh;
-            -webkit-tap-highlight-color: transparent;
+            margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden;
         }
 
-        /* --- SPLASH SCREEN --- */
-        #splash {
-            position: fixed; inset: 0; background: #000; z-index: 20000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .splash-logo { font-family: 'Lexend'; font-size: 50px; font-weight: 900; color: var(--g-blue); animation: zoomPulse 1.5s infinite alternate; }
-        @keyframes zoomPulse { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1.1); opacity: 1; } }
+        /* --- UI UTILS --- */
+        .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .bento-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; animation: slideUp 0.6s forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- HEADER --- */
-        header {
-            padding: 20px 25px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 1000;
-        }
-        .logo { font-family: 'Lexend'; font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -1px; }
-        .logo span { color: var(--g-blue); }
-        .header-actions { display: flex; gap: 12px; align-items: center; }
-        .h-btn { width: 38px; height: 38px; background: #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.3s; color: #888; }
-        .h-btn:active { background: var(--g-blue); color: #fff; transform: scale(0.9); }
-        
-        .avatar-box { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--g-green); display: flex; align-items: center; justify-content: center; background: #111; overflow: hidden; font-weight: 900; color: var(--g-green); font-size: 14px; position: relative; }
-        #p-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-
-        /* --- CONTENT AREA --- */
-        .tab-content { display: none; padding: 20px; height: calc(100vh - 160px); overflow-y: auto; scrollbar-width: none; }
+        /* --- TABS --- */
+        .tab-content { display: none; height: calc(100vh - 150px); overflow-y: auto; padding-bottom: 80px; }
+        .tab-content.active { display: block; }
         .tab-content::-webkit-scrollbar { display: none; }
-        .active-tab { display: block; animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* --- DASHBOARD --- */
-        .mission-timer {
-            background: linear-gradient(145deg, #0f0f0f, #050505); padding: 35px 20px;
-            border-radius: 35px; border: 1px solid var(--border); text-align: center; margin-bottom: 25px;
-        }
-        #timer-clock { font-family: 'Lexend'; font-size: 52px; font-weight: 900; color: #fff; letter-spacing: -2px; }
-        .timer-label { font-size: 10px; letter-spacing: 3px; color: #555; font-weight: 900; margin-bottom: 5px; }
+        .bento-card { border-radius: 30px; padding: 22px; display: flex; flex-direction: column; transition: var(--transition); }
+        .wide { grid-column: span 2; }
+        .tall { grid-row: span 2; }
 
-        .progress-card { background: var(--card); padding: 25px; border-radius: 30px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border); position: relative; }
-        .ring-bar { fill: none; stroke: var(--g-green); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 377; stroke-dashoffset: 377; transition: 1.5s ease-out; filter: drop-shadow(0 0 8px var(--g-green)); }
-        .pct-text { font-family: 'Lexend'; font-size: 28px; font-weight: 900; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        /* --- PROGRESS RING --- */
+        .ring-bar { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 301.59; stroke-dashoffset: 301.59; transition: 1.5s ease; filter: drop-shadow(0 0 8px var(--accent)); }
+        
+        /* --- CALENDAR --- */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
+        .day { height: 35px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; }
+        .day.green { background: #34A853 !important; color: #000; box-shadow: 0 0 10px #34A853; }
+        .day.red { border: 1px solid #EA4335; color: #EA4335; opacity: 0.5; }
 
-        /* --- TASKS --- */
-        .task-row {
-            display: flex; align-items: center; padding: 18px; background: #111; 
-            border-radius: 22px; margin-bottom: 12px; border: 1px solid var(--border); transition: 0.3s;
-        }
-        .task-row.checked { background: rgba(52, 168, 83, 0.05); border-color: rgba(52, 168, 83, 0.3); }
-        input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--g-green); cursor: pointer; }
+        /* --- TASK ITEM --- */
+        .task-item { display: flex; align-items: center; padding: 18px; background: rgba(255,255,255,0.02); border-radius: 22px; margin-bottom: 12px; border: 1px solid transparent; transition: 0.3s; }
+        .task-item.checked { border-color: var(--accent); opacity: 0.5; }
+        .task-item.fizzed { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
+        .task-item.priority { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
         /* --- DOCK --- */
-        .dock {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(15,15,15,0.85); backdrop-filter: blur(30px);
-            padding: 12px 40px; border-radius: 50px; display: flex; gap: 45px; border: 1px solid #222; z-index: 1000;
-        }
-        .dock i { font-size: 22px; color: #444; transition: 0.3s; cursor: pointer; }
-        .dock i.active { color: var(--g-blue); text-shadow: 0 0 15px var(--g-blue); }
+        .dock { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: rgba(15,15,15,0.85); backdrop-filter: blur(20px); padding: 10px 30px; border-radius: 50px; display: flex; gap: 25px; border: 1px solid var(--border); z-index: 1000; }
+        .dock i { font-size: 18px; color: #444; transition: 0.3s; cursor: pointer; }
+        .dock .active i { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
 
-        /* --- CALENDAR --- */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .day { height: 40px; background: #111; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; border: 1px solid transparent; }
-        .day.green { background: var(--g-green) !important; color: black; box-shadow: 0 0 15px rgba(52, 168, 83, 0.4); }
-        .day.red { border-color: var(--g-red); color: var(--g-red); opacity: 0.6; }
-        .day.today { border: 2px solid var(--g-blue); }
+        /* --- SLEEP LOCK --- */
+        #sleep-lock { position: fixed; inset: 0; background: #000; z-index: 30000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
 
-        /* --- SEARCH & DETAIL OVERLAYS --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 5000; display: none; padding: 30px; backdrop-filter: blur(15px); overflow-y: auto; }
-        .search-input { width: 100%; background: #111; border: 1px solid #333; color: white; padding: 18px; border-radius: 20px; font-size: 18px; outline: none; margin-top: 20px; font-family: 'Inter'; }
-        
-        .protocol-card { background: #111; padding: 20px; border-radius: 22px; margin-bottom: 15px; border-left: 5px solid var(--g-blue); cursor: pointer; transition: 0.3s; }
-        .protocol-card:active { transform: scale(0.97); }
-
-        .detail-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
-        .detail-body h3 { color: var(--g-blue); font-family: 'Lexend'; margin-top: 25px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        .detail-body p { line-height: 1.6; color: #aaa; font-size: 15px; }
-        .benefit-tag { display: inline-block; background: rgba(66, 133, 244, 0.1); color: var(--g-blue); padding: 5px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; margin-right: 8px; margin-top: 10px; }
-
-        /* Setup Modal */
-        #onboarding { position: fixed; inset:0; background:#000; z-index:15000; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; }
-        .btn-go { background: var(--g-blue); color: #fff; border: none; padding: 15px 50px; border-radius: 50px; margin-top: 30px; font-weight: 900; letter-spacing: 1px; cursor: pointer; }
-
-        .watermark { text-align: center; font-size: 10px; letter-spacing: 8px; color: #222; font-weight: 900; margin-top: 50px; text-transform: uppercase; padding-bottom: 100px; }
+        /* --- SPARKLINE --- */
+        .spark-bar { width: 100%; background: rgba(255,255,255,0.05); border-radius: 4px; min-height: 2px; }
+        .spark-bar.active { background: var(--accent); opacity: 0.7; }
     </style>
 </head>
-<body>
+<body onload="initSystem()">
 
-    <!-- Splash Screen -->
-    <div id="splash">
-        <div class="splash-logo">sXam</div>
-        <p class="timer-label" style="color: #444;">ARCHITECT OS v10</p>
+    <!-- Sleep Lock -->
+    <div id="sleep-lock">
+        <h1 style="font-family:'Lexend'; color:#EA4335;">⚠️ TIME FOR SLEEP</h1>
+        <p style="color:#555; line-height:1.6; margin-top:15px;">Biological recovery window active.<br>System opens at 07:00 AM.</p>
     </div>
 
-    <!-- Nickname Setup -->
-    <div id="onboarding">
-        <h1 style="font-family:'Lexend'; color: var(--g-blue);">Architect Initialized</h1>
-        <p style="color:#555">Identity needed for Mainframe sync</p>
-        <input type="text" id="nick-input" placeholder="Architect Nickname..." class="search-input" style="text-align:center;">
-        <button class="btn-go" onclick="saveIdentity()">SYNC DATA</button>
-    </div>
+    <div id="toast-container" style="position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 10000;"></div>
 
-    <!-- Search Overlay -->
-    <div id="search-overlay" class="overlay">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="font-family:'Lexend'; margin:0">Discovery</h2>
-            <div class="h-btn" onclick="toggleSearch(false)"><i class="fas fa-times"></i></div>
-        </div>
-        <input type="text" id="search-box" placeholder="Search protocol (e.g. Water, SPF)..." class="search-input" oninput="doSearch(this.value)">
-        <div id="search-results" style="margin-top:25px;"></div>
-    </div>
-
-    <!-- Detail Deep Dive Overlay -->
-    <div id="detail-overlay" class="overlay">
-        <div class="h-btn" onclick="closeDetail()" style="margin-bottom: 20px;"><i class="fas fa-arrow-left"></i></div>
-        <div id="detail-content"></div>
-    </div>
-
-    <!-- Header -->
-    <header>
-        <div class="logo">s<span>Xam</span></div>
-        <div class="header-actions">
-            <div class="h-btn" onclick="toggleSearch(true)"><i class="fas fa-search"></i></div>
-            <div class="h-btn" onclick="quickPlus()"><i class="fas fa-plus"></i></div>
-            <div class="avatar-box" onclick="document.getElementById('file-in').click()">
-                <span id="initials">A</span>
-                <img id="p-img" style="display:none">
-                <input type="file" id="file-in" style="display:none" onchange="handlePic(event)">
-            </div>
-        </div>
+    <header style="padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);">
+        <div style="font-family:'Lexend'; font-size: 20px; font-weight: 900;">s<span style="color:var(--accent)">Xam</span> OS <small style="font-size: 10px; color:#444;">v21</small></div>
+        <div id="status-tag" style="font-size: 9px; font-weight: 900; color: #34A853;">SYSTEM: ACTIVE</div>
     </header>
 
     <main>
         <!-- Home Dashboard -->
-        <div id="home" class="tab-content active-tab">
-            <div class="mission-timer">
-                <div class="timer-label" id="m-status">NEXT MISSION</div>
-                <div id="timer-clock">00:00:00</div>
-                <div style="font-size: 11px; color: var(--g-blue); font-weight: 900; letter-spacing: 2px;" id="nick-display">ARCHITECT</div>
-            </div>
+        <div id="tab-home" class="tab-content active">
+            <div class="bento-grid">
+                <div class="bento-card wide glass" style="text-align: center;">
+                    <div id="greeting" style="font-size: 9px; font-weight: 900; letter-spacing: 2px; color: #555;">NEURAL CORE READY</div>
+                    <div id="timer-clock" style="font-family: 'Lexend'; font-size: 45px; font-weight: 900; letter-spacing: -2px;">00:00:00</div>
+                    <div id="lvl-display" style="color: var(--accent); font-size: 11px; font-weight: 900; margin-top: 5px;">LEVEL 1 ARCHITECT</div>
+                    <div style="width:100%; height:4px; background:rgba(255,255,255,0.05); border-radius:10px; margin-top:10px;">
+                        <div id="xp-bar" style="height:100%; background:var(--accent); width:0%; transition:1s;"></div>
+                    </div>
+                    <div id="sparkline" style="display:flex; align-items:flex-end; gap:5px; height:25px; margin-top:15px;"></div>
+                </div>
 
-            <div class="progress-card">
-                <div style="position:relative; width:120px; height:120px; margin:0 auto;">
-                    <svg width="120" height="120">
-                        <circle cx="60" cy="60" r="55" stroke="#1a1a1a" stroke-width="8" fill="none"></circle>
-                        <circle id="ring" cx="60" cy="60" r="55" class="ring-bar"></circle>
-                    </svg>
-                    <div class="pct-text" id="pct-val">0%</div>
+                <div class="bento-card tall glass" style="align-items: center; justify-content: center;">
+                    <div style="position: relative; width: 100px; height: 100px;">
+                        <svg width="100" height="100">
+                            <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"></circle>
+                            <circle cx="50" cy="50" r="48" class="ring-bar" id="ring"></circle>
+                        </svg>
+                        <div style="position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-family:'Lexend'; font-weight:900; font-size:20px;" id="pct-val">0%</div>
+                    </div>
+                    <div style="font-size: 10px; font-weight: 900; color: #555; margin-top: 25px;">DISCIPLINE</div>
+                </div>
+
+                <div class="bento-card glass" style="align-items: center; justify-content: center;">
+                    <div style="font-size: 32px; font-weight: 900; color: var(--accent);" id="streak-val">0</div>
+                    <div style="font-size: 10px; font-weight: 900; color: #555;">STREAK</div>
+                </div>
+
+                <div class="bento-card wide glass">
+                    <div style="font-size: 10px; font-weight: 900; color: #fff; margin-bottom:15px; letter-spacing: 1px;">ACTIVE PROTOCOLS</div>
+                    <div id="task-container"></div>
                 </div>
             </div>
-
-            <div id="task-list"></div>
-            <div class="watermark">Architect OS v10</div>
         </div>
 
-        <!-- Battlefield (Calendar) -->
-        <div id="calendar" class="tab-content">
-            <div class="timer-label" style="margin-bottom:15px">DISCIPLINE BATTLEFIELD</div>
-            <div class="progress-card">
+        <!-- Battlefield Tab -->
+        <div id="tab-battle" class="tab-content">
+            <div style="padding: 25px;">
+                <div style="font-family:'Lexend'; font-size: 18px; font-weight: 900;">BATTLEFIELD</div>
                 <div class="cal-grid" id="cal-grid"></div>
+                <div style="margin-top: 30px; padding: 20px; border-radius: 22px; background: rgba(255,255,255,0.02); border: 1px solid var(--border);">
+                    <div style="font-size: 11px; font-weight: 900; color: #FBBC05;">ARCHITECT'S NOTE</div>
+                    <p style="font-size: 13px; color: #888; line-height: 1.6; margin-top: 8px;">Discipline is the fuel for greatness. Every green day is a victory.</p>
+                </div>
             </div>
-            <p style="text-align:center; font-size:12px; font-weight:900;">STREAK: <span id="streak" style="color:var(--g-green)">0</span> DAYS</p>
         </div>
 
-        <!-- Knowledge Library -->
-        <div id="library" class="tab-content">
-            <div class="timer-label" style="margin-bottom:15px">GORGEOUS PROTOCOLS</div>
-            <div id="lib-content"></div>
+        <!-- Library Tab -->
+        <div id="tab-lib" class="tab-content">
+            <div style="padding: 25px;">
+                <div style="font-family:'Lexend'; font-size: 18px; font-weight: 900;">MIRROR VAULT</div>
+                <div style="margin-top: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;" id="photo-grid">
+                    <div onclick="document.getElementById('vault-up').click()" style="height: 100px; border: 2px dashed #222; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: #444;"><i class="fas fa-camera"></i></div>
+                </div>
+                <input type="file" id="vault-up" style="display:none" onchange="saveToVault(this)">
+                
+                <div style="font-family:'Lexend'; font-size: 18px; font-weight: 900; margin-top: 40px;">KNOWLEDGE BASE</div>
+                <div id="lib-container" style="margin-top: 15px;"></div>
+            </div>
         </div>
     </main>
 
-    <!-- Navigation Dock -->
     <nav class="dock">
-        <i class="fas fa-home active" onclick="switchTab('home', this)"></i>
-        <i class="fas fa-calendar-alt" onclick="switchTab('calendar', this)"></i>
-        <i class="fas fa-book-open" onclick="switchTab('library', this)"></i>
+        <div class="nav-icon active" onclick="switchTab('home', this)"><i class="fas fa-home"></i></div>
+        <div class="nav-icon" onclick="switchTab('battle', this)"><i class="fas fa-calendar-check"></i></div>
+        <div class="nav-icon" onclick="switchTab('lib', this)"><i class="fas fa-book-open"></i></div>
     </nav>
 
     <script>
-        // Deep Dive Knowledge Base
-        const protocols = [
-            {
-                t:'Drink 3L Water 💧', 
-                s:'Hydration is the engine of cellular skin repair.',
-                benefits: ['Flush Toxins', 'Natural Glow', 'Reduce Puffiness'],
-                science: 'Drinking water improves blood flow to the skin, which helps in delivering nutrients and oxygen to skin cells, resulting in a healthier complexion and faster healing of acne.',
-                instructions: 'Start with 500ml upon waking up. Use a marked bottle to track throughout the day.'
-            },
-            {
-                t:'Icy Face Wash 🧼', 
-                s:'Cold water tightens skin and boosts blood flow.',
-                benefits: ['Tightens Pores', 'Reduces Oil', 'Instant Awake'],
-                science: 'Cold exposure causes vasoconstriction, which helps reduce inflammation and redness. It also constricts pores, preventing dirt buildup.',
-                instructions: 'Use ice-cold water for 30 seconds every morning. Do not use harsh soaps immediately after.'
-            },
-            {
-                t:'SPF Protection ☀️', 
-                s:'Your primary shield against aging.',
-                benefits: ['Anti-Aging', 'No Dark Spots', 'DNA Protection'],
-                science: 'UV rays break down collagen and elastin. SPF creates a chemical or physical barrier that reflects or absorbs these rays before they damage the skin layers.',
-                instructions: 'Apply 2 fingers length of SPF 50+ even if it is cloudy or you are indoors.'
-            },
-            {
-                t:'Double Cleanse 🧴', 
-                s:'Deep decontamination of the facial canvas.',
-                benefits: ['Zero Clogs', 'Prevents Acne', 'Deep Clean'],
-                science: 'Oil-based cleansers break down sebum and waterproof SPF, while water-based cleansers remove sweat and bacteria. One wash is never enough.',
-                instructions: 'Step 1: Oil/Balm cleanser on dry skin. Step 2: Foaming cleanser on wet skin.'
-            }
-        ];
+        const State = {
+            xp: parseInt(localStorage.getItem('v21_xp')) || 0,
+            tasks: [
+                { id: 'm1', t: 'Gentle Cleanse 🧼', s: 700, e: 1100, note: 'Lukewarm water' },
+                { id: 'm2', t: 'Hydrate Skin 💧', s: 710, e: 1110, note: 'Oil-free moisturizer' },
+                { id: 'm3', t: 'SPF Shield ☀️', s: 715, e: 1500, note: 'Broad-spectrum SPF 30+' },
+                { id: 'd1', t: 'Hydration Cycle 🍎', s: 0, e: 2400, note: 'Water every 2-3 hours' },
+                { id: 'e1', t: 'Evening Cleanse 🧴', s: 2030, e: 2230, note: 'Wash away day dirt' },
+                { id: 'e2', t: 'Niacinamide 10% ✨', s: 2035, e: 2230, note: 'Pat, do not rub' },
+                { id: 'e3', t: 'Moisturize 🔒', s: 2045, e: 2230, note: 'Lock in healing' },
+                { id: 'e4', t: 'Pillowcase Check 🛌', s: 2100, e: 2230, note: 'Clean bedding' }
+            ]
+        };
 
-        const tasks = [
-            {id:'m1', text:'Icy Face Wash 🧼', time:'morning'},
-            {id:'m2', text:'SPF Shield ☀️', time:'morning'},
-            {id:'l1', text:'3.5L Hydration 💧', time:'always'},
-            {id:'n1', text:'Double Cleansing 🧴', time:'night'},
-            {id:'n2', text:'Niacinamide Recovery ✨', time:'night'}
-        ];
-
-        // Startup Logic
-        setTimeout(() => {
-            document.getElementById('splash').style.display = 'none';
+        function initSystem() {
             checkDailyReset();
-            if(!localStorage.getItem('v10_nick')) document.getElementById('onboarding').style.display = 'flex';
-            else setupUI();
-        }, 2000);
-
-        function checkDailyReset() {
-            const today = new Date().toDateString();
-            const lastVisit = localStorage.getItem('v10_last_visit');
-            if (lastVisit !== today) {
-                tasks.forEach(t => localStorage.removeItem('v10_task_' + t.id));
-                localStorage.setItem('v10_last_visit', today);
-            }
-        }
-
-        function saveIdentity() {
-            const val = document.getElementById('nick-input').value;
-            if(!val) return;
-            localStorage.setItem('v10_nick', val.toUpperCase());
-            localStorage.setItem('v10_start', new Date().toDateString());
-            document.getElementById('onboarding').style.display = 'none';
-            confetti({ particleCount: 150 });
-            setupUI();
-        }
-
-        function runTimer() {
-            const now = new Date();
-            const hr = now.getHours();
-            let target = new Date();
-            if(hr < 5) target.setHours(5,0,0);
-            else if(hr < 14) target.setHours(14,0,0);
-            else { target.setDate(target.getDate()+1); target.setHours(5,0,0); }
-            const diff = target - now;
-            const h = Math.floor(diff/3600000).toString().padStart(2,'0');
-            const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
-            const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
-            document.getElementById('timer-clock').innerText = `${h}:${m}:${s}`;
-            document.getElementById('m-status').innerText = (hr < 14 && hr >= 5) ? "NIGHT MISSION STARTS IN" : "MORNING MISSION STARTS IN";
-        }
-        setInterval(runTimer, 1000);
-
-        function setupUI() {
-            const nick = localStorage.getItem('v10_nick');
-            document.getElementById('nick-display').innerText = "ARCHITECT: " + nick;
-            document.getElementById('initials').innerText = nick[0];
-            updateAvatarDisplay();
+            updateTheme();
             renderTasks();
+            renderXP();
+            updateProgress();
+            renderSparkline();
             renderLibrary();
+            renderVault();
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('timer-clock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+                checkSystemLock(now);
+                checkFizzing(now);
+            }, 1000);
         }
 
-        function updateAvatarDisplay() {
-            const imgData = localStorage.getItem('v10_img');
-            if(imgData) {
-                const imgEl = document.getElementById('p-img');
-                imgEl.src = imgData;
-                imgEl.style.display = 'block';
-                document.getElementById('initials').style.display = 'none';
-            }
+        function switchTab(tab, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            el.classList.add('active');
+            if(tab === 'battle') renderCalendar();
         }
 
-        function handlePic(e) {
-            const reader = new FileReader();
-            reader.onload = () => { 
-                localStorage.setItem('v10_img', reader.result); 
-                updateAvatarDisplay();
-                confetti({particleCount: 50});
-            };
-            reader.readAsDataURL(e.target.files[0]);
+        function checkSystemLock(now) {
+            const time = now.getHours() * 100 + now.getMinutes();
+            document.getElementById('sleep-lock').style.display = (time >= 2230 || time < 700) ? 'flex' : 'none';
+        }
+
+        function checkFizzing(now) {
+            const time = now.getHours() * 100 + now.getMinutes();
+            State.tasks.forEach(task => {
+                const el = document.getElementById(`item-${task.id}`);
+                if (!el) return;
+                if ((task.e !== 2400 && time > task.e) || (time < task.s && task.s !== 0)) el.classList.add('fizzed');
+                else el.classList.remove('fizzed');
+            });
         }
 
         function renderTasks() {
-            const hr = new Date().getHours();
-            const container = document.getElementById('task-list');
-            container.innerHTML = '';
-            tasks.forEach(t => {
-                if(t.time !== 'always') {
-                    if(hr >= 14 && t.time === 'morning') return;
-                    if(hr < 14 && t.time === 'night') return;
-                }
-                const done = localStorage.getItem('v10_task_'+t.id) === 'true';
-                container.innerHTML += `
-                    <div class="task-row ${done?'checked':''}">
-                        <input type="checkbox" id="${t.id}" ${done?'checked':''} onchange="toggleTask('${t.id}')">
-                        <label for="${t.id}" style="margin-left:15px; flex:1; cursor:pointer; font-weight:600;">${t.text}</label>
+            const container = document.getElementById('task-container');
+            const now = new Date();
+            const time = now.getHours() * 100 + now.getMinutes();
+            container.innerHTML = State.tasks.map(task => {
+                const done = localStorage.getItem('v21_task_' + task.id) === 'true';
+                const isPriority = (time >= task.s && time <= task.e && !done);
+                return `
+                    <div class="task-item ${done ? 'checked' : ''} ${isPriority ? 'priority' : ''}" id="item-${task.id}">
+                        <input type="checkbox" ${done ? 'checked' : ''} onchange="toggleTask('${task.id}', this.checked)">
+                        <div style="margin-left:15px; flex:1;">
+                            <div style="font-size:14px; font-weight:700;">${task.t}</div>
+                            <div style="font-size:10px; color:var(--accent); font-weight:800; margin-top:2px;">${task.note}</div>
+                        </div>
                     </div>
                 `;
-            });
+            }).join('');
+        }
+
+        function toggleTask(id, isChecked) {
+            localStorage.setItem('v21_task_' + id, isChecked);
+            const today = new Date().toDateString();
+            if(isChecked && !localStorage.getItem(`v21_xp_${id}_${today}`)) {
+                State.xp += 25;
+                localStorage.setItem('v21_xp', State.xp);
+                localStorage.setItem(`v21_xp_${id}_${today}`, 'true');
+                renderXP();
+            }
+            renderTasks();
             updateProgress();
         }
 
-        function toggleTask(id) {
-            localStorage.setItem('v10_task_'+id, document.getElementById(id).checked);
-            renderTasks();
-        }
-
         function updateProgress() {
-            const hr = new Date().getHours();
-            const visibleTasks = tasks.filter(t => (t.time === 'always') || (hr < 14 && t.time === 'morning') || (hr >= 14 && t.time === 'night'));
-            let done = 0;
-            visibleTasks.forEach(t => { if(localStorage.getItem('v10_task_'+t.id) === 'true') done++; });
-            const pct = Math.round((done / visibleTasks.length) * 100) || 0;
-            document.getElementById('ring').style.strokeDashoffset = 377 - (377 * pct) / 100;
+            const done = State.tasks.filter(t => localStorage.getItem('v21_task_' + t.id) === 'true').length;
+            const pct = Math.round((done / State.tasks.length) * 100) || 0;
+            document.getElementById('ring').style.strokeDashoffset = 301.59 - (301.59 * pct) / 100;
             document.getElementById('pct-val').innerText = pct + "%";
-            if(pct === 100 && localStorage.getItem('v10_done_today') !== new Date().toDateString()) {
-                localStorage.setItem('v10_done_today', new Date().toDateString());
-                markDay('green', new Date().toDateString());
-                confetti({ particleCount: 200, spread: 80 });
+            const history = JSON.parse(localStorage.getItem('v21_history') || "{}");
+            history[new Date().toDateString()] = pct;
+            localStorage.setItem('v21_history', JSON.stringify(history));
+            
+            let streak = 0, check = new Date();
+            if (pct !== 100) check.setDate(check.getDate() - 1);
+            while(history[check.toDateString()] === 100) { streak++; check.setDate(check.getDate() - 1); }
+            document.getElementById('streak-val').innerText = streak;
+            if(pct === 100 && localStorage.getItem('v21_done_today') !== new Date().toDateString()) {
+                confetti({ particleCount: 150, spread: 70 });
+                localStorage.setItem('v21_done_today', new Date().toDateString());
             }
-        }
-
-        function markDay(status, dateStr) {
-            let history = JSON.parse(localStorage.getItem('v10_history') || "{}");
-            history[dateStr] = status;
-            localStorage.setItem('v10_history', JSON.stringify(history));
-            updateStreak(history);
-        }
-
-        function updateStreak(history) {
-            let streak = 0;
-            let d = new Date();
-            while(history[d.toDateString()] === 'green') { streak++; d.setDate(d.getDate()-1); }
-            localStorage.setItem('v10_streak', streak);
-            document.getElementById('streak').innerText = streak;
         }
 
         function renderCalendar() {
             const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
+            const history = JSON.parse(localStorage.getItem('v21_history') || "{}");
             const now = new Date();
             const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            const history = JSON.parse(localStorage.getItem('v10_history') || "{}");
-            const start = new Date(localStorage.getItem('v10_start'));
-
             for(let i=1; i<=daysInMonth; i++) {
-                const d = new Date(now.getFullYear(), now.getMonth(), i);
-                const day = document.createElement('div');
-                day.className = 'day';
-                const ds = d.toDateString();
-                if(history[ds]) day.classList.add('green');
-                else if (d < new Date().setHours(0,0,0,0) && d >= start) day.classList.add('red');
-                if(ds === new Date().toDateString()) day.classList.add('today');
-                day.innerText = i;
-                grid.appendChild(day);
+                const d = new Date(now.getFullYear(), now.getMonth(), i).toDateString();
+                const dayEl = document.createElement('div');
+                dayEl.className = 'day';
+                if(history[d] === 100) dayEl.classList.add('green');
+                else if(new Date(d) < new Date().setHours(0,0,0,0)) dayEl.classList.add('red');
+                dayEl.innerText = i;
+                grid.appendChild(dayEl);
             }
-            document.getElementById('streak').innerText = localStorage.getItem('v10_streak') || 0;
         }
 
-        function switchTab(id, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-tab'));
-            document.querySelectorAll('.dock i').forEach(i => i.classList.remove('active'));
-            document.getElementById(id).classList.add('active-tab');
-            el.classList.add('active');
-            if(id === 'calendar') renderCalendar();
-            if(id === 'library') renderLibrary();
+        function renderSparkline() {
+            const history = JSON.parse(localStorage.getItem('v21_history') || "{}");
+            const container = document.getElementById('sparkline'); container.innerHTML = '';
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const val = history[d.toDateString()] || 0;
+                const bar = document.createElement('div');
+                bar.className = `spark-bar ${val === 100 ? 'active' : ''}`;
+                bar.style.height = Math.max(2, (val * 0.25)) + 'px';
+                container.appendChild(bar);
+            }
         }
 
-        // Search & Deep Dive Logic
-        function toggleSearch(show) { 
-            document.getElementById('search-overlay').style.display = show ? 'block' : 'none'; 
-            if(show) document.getElementById('search-box').focus();
-        }
-
-        function doSearch(q) {
-            const res = document.getElementById('search-results');
-            if(!q) { res.innerHTML = ''; return; }
-            res.innerHTML = protocols.filter(p => p.t.toLowerCase().includes(q.toLowerCase()))
-                .map((p, idx) => `
-                    <div class="protocol-card" onclick="openDetail('${p.t}')">
-                        <div style="font-weight:900;">${p.t}</div>
-                        <div style="font-size:12px; color:#666; margin-top:5px;">${p.s}</div>
-                    </div>
-                `).join('');
-        }
-
-        function openDetail(title) {
-            const p = protocols.find(x => x.t === title);
-            const content = document.getElementById('detail-content');
-            content.innerHTML = `
-                <div class="detail-header">
-                    <h1 style="font-family:'Lexend'; margin:0; font-size:28px;">${p.t}</h1>
-                </div>
-                <div class="detail-body">
-                    <h3>The Benefits</h3>
-                    <div>${p.benefits.map(b => `<span class="benefit-tag">${b}</span>`).join('')}</div>
-                    
-                    <h3>The Science</h3>
-                    <p>${p.science}</p>
-                    
-                    <h3>Architect's Instruction</h3>
-                    <p>${p.instructions}</p>
-                    
-                    <button class="btn-go" onclick="closeDetail()" style="width:100%">PROTOCOL UNDERSTOOD</button>
-                </div>
-            `;
-            document.getElementById('detail-overlay').style.display = 'block';
-        }
-
-        function closeDetail() { document.getElementById('detail-overlay').style.display = 'none'; }
-        
         function renderLibrary() {
-            const container = document.getElementById('lib-content');
-            container.innerHTML = protocols.map(p => `
-                <div class="protocol-card" onclick="openDetail('${p.t}')">
-                    <h4 style="margin:0; font-family:'Lexend'; color:var(--g-blue)">${p.t}</h4>
-                    <p style="margin:8px 0 0; font-size:13px; color:#888;">${p.s}</p>
+            document.getElementById('lib-container').innerHTML = State.tasks.map(t => `
+                <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:18px; border:1px solid var(--border); margin-bottom:10px;">
+                    <div style="font-weight:800; color:var(--accent); font-size:13px;">${t.t}</div>
+                    <p style="font-size:11px; color:#666; margin-top:5px; line-height:1.4;">${t.note}. Execution time: ${Math.floor(t.s/100)}:00 - ${Math.floor(t.e/100)}:00</p>
                 </div>
-            `).join('') + `<div class="watermark">v10 Knowledge Vault</div>`;
+            `).join('');
         }
 
-        function quickPlus() { 
-            alert("Architect OS: 1 Glass of Water Logged! 💧"); 
-            confetti({particleCount:40, colors: ['#4285F4']}); 
+        function saveToVault(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                let photos = JSON.parse(localStorage.getItem('v21_vault') || "[]");
+                photos.unshift(e.target.result);
+                if(photos.length > 9) photos.pop();
+                localStorage.setItem('v21_vault', JSON.stringify(photos));
+                renderVault();
+            };
+            reader.readAsDataURL(input.files[0]);
         }
 
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+        function renderVault() {
+            const grid = document.getElementById('photo-grid');
+            const photos = JSON.parse(localStorage.getItem('v21_vault') || "[]");
+            grid.innerHTML = `<div onclick="document.getElementById('vault-up').click()" style="height: 100px; border: 2px dashed #222; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: #444;"><i class="fas fa-camera"></i></div>`;
+            photos.forEach(p => grid.innerHTML += `<div style="height: 100px; border-radius: 15px; overflow:hidden; background: url('${p}') center/cover;"></div>`);
+        }
+
+        function renderXP() {
+            const lvl = Math.floor(State.xp / 100) + 1;
+            document.getElementById('lvl-display').innerText = `LEVEL ${lvl} ARCHITECT`;
+            document.getElementById('xp-bar').style.width = (State.xp % 100) + "%";
+        }
+
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            if (localStorage.getItem('v21_last_date') !== today) {
+                State.tasks.forEach(t => localStorage.removeItem('v21_task_' + t.id));
+                localStorage.setItem('v21_last_date', today);
+            }
+        }
+
+        function updateTheme() {
+            const hr = new Date().getHours();
+            let accent = '#4285F4';
+            if(hr >= 5 && hr < 11) accent = '#FBBC05';
+            else if(hr >= 18 && hr < 22) accent = '#34A853';
+            else if(hr >= 22 || hr < 5) accent = '#8AB4F8';
+            document.documentElement.style.setProperty('--accent', accent);
+        }
     </script>
 </body>
-</html>
+ </html>

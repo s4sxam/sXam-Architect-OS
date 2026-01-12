@@ -1,9 +1,11 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Architect | Absolute Victory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>sXam OS | Modern Architect</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -11,9 +13,13 @@
     
     <style>
         :root {
-            --accent: #4285F4; --bg: #000; --card: #0d0d0d; --text: #f1f3f4;
-            --border: rgba(255, 255, 255, 0.1); --glass: rgba(255, 255, 255, 0.03);
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --accent: #4285F4; 
+            --bg: #000000; 
+            --card: #0d0d0d; 
+            --text: #f1f3f4;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.03);
+            --red: #EA4335;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -22,318 +28,359 @@
             margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden;
         }
 
-        /* --- UI UTILS --- */
-        .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        .bento-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; animation: slideUp 0.6s forwards; }
+        /* --- MODERN COMPONENTS --- */
+        .glass-panel { background: var(--glass); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 32px; }
+        .bento-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 20px; }
+        .wide { grid-column: span 2; }
+
+        .tab-content { display: none; height: calc(100vh - 160px); overflow-y: auto; padding-bottom: 100px; }
+        .tab-content.active { display: block; animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- TABS --- */
-        .tab-content { display: none; height: calc(100vh - 150px); overflow-y: auto; padding-bottom: 80px; }
-        .tab-content.active { display: block; }
-        .tab-content::-webkit-scrollbar { display: none; }
+        /* --- HEADER & CLOCK --- */
+        .header-section { text-align: center; padding: 45px 20px 20px; position: relative; }
+        #timer-label { font-size: 10px; font-weight: 900; letter-spacing: 3px; color: #555; text-transform: uppercase; }
+        #countdown-timer { font-family: 'Lexend'; font-size: 55px; font-weight: 900; letter-spacing: -3px; margin: 8px 0; }
+        .pulse { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0% { opacity: 1; } 50% { opacity: 0.6; color: var(--accent); } 100% { opacity: 1; } }
 
-        .bento-card { border-radius: 30px; padding: 22px; display: flex; flex-direction: column; transition: var(--transition); }
-        .wide { grid-column: span 2; }
-        .tall { grid-row: span 2; }
+        .xp-badge { background: var(--accent); color: #000; padding: 4px 14px; border-radius: 50px; font-size: 10px; font-weight: 900; }
 
-        /* --- PROGRESS RING --- */
-        .ring-bar { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 301.59; stroke-dashoffset: 301.59; transition: 1.5s ease; filter: drop-shadow(0 0 8px var(--accent)); }
-        
-        /* --- CALENDAR --- */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 15px; }
-        .day { height: 35px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; }
-        .day.green { background: #34A853 !important; color: #000; box-shadow: 0 0 10px #34A853; }
-        .day.red { border: 1px solid #EA4335; color: #EA4335; opacity: 0.5; }
+        /* --- PROTOCOLS --- */
+        .task-card { display: flex; align-items: center; padding: 18px; background: rgba(255,255,255,0.02); border-radius: 24px; margin-bottom: 10px; border: 1px solid var(--border); transition: 0.3s; }
+        .task-card.done { opacity: 0.3; filter: grayscale(1); }
+        .task-checkbox { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .task-checkbox.checked { background: var(--accent); }
 
-        /* --- TASK ITEM --- */
-        .task-item { display: flex; align-items: center; padding: 18px; background: rgba(255,255,255,0.02); border-radius: 22px; margin-bottom: 12px; border: 1px solid transparent; transition: 0.3s; }
-        .task-item.checked { border-color: var(--accent); opacity: 0.5; }
-        .task-item.fizzed { opacity: 0.15; pointer-events: none; filter: grayscale(1); }
-        .task-item.priority { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        /* --- BATTLEFIELD CALENDAR --- */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 20px; }
+        .day-box { aspect-ratio: 1; background: var(--glass); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #333; border: 1px solid transparent; cursor: pointer; }
+        .day-box.active { color: #fff; border-color: #444; }
+        .day-box.win { background: #34A853 !important; color: #000 !important; box-shadow: 0 0 15px rgba(52, 168, 83, 0.4); }
+        .day-box.has-note { border-color: var(--accent); }
 
-        /* --- DOCK --- */
-        .dock { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: rgba(15,15,15,0.85); backdrop-filter: blur(20px); padding: 10px 30px; border-radius: 50px; display: flex; gap: 25px; border: 1px solid var(--border); z-index: 1000; }
-        .dock i { font-size: 18px; color: #444; transition: 0.3s; cursor: pointer; }
-        .dock .active i { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        /* --- NAVIGATION --- */
+        .dock { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(15,15,15,0.8); backdrop-filter: blur(20px); padding: 12px 35px; border-radius: 50px; display: flex; gap: 40px; border: 1px solid var(--border); z-index: 1000; }
+        .nav-btn { font-size: 20px; color: #333; transition: 0.3s; cursor: pointer; }
+        .nav-btn.active { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
 
-        /* --- SLEEP LOCK --- */
-        #sleep-lock { position: fixed; inset: 0; background: #000; z-index: 30000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+        /* --- MODALS --- */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; padding: 25px; }
+        .modal-content { background: #0a0a0a; border: 1px solid var(--border); border-radius: 35px; padding: 30px; width: 100%; max-width: 450px; position: relative; }
+        textarea, .st-input { width: 100%; background: #000; border: 1px solid var(--border); border-radius: 15px; color: #fff; padding: 15px; font-family: 'Inter'; margin-top: 15px; }
+        textarea { height: 150px; resize: none; border-left: 4px solid var(--accent); }
 
-        /* --- SPARKLINE --- */
-        .spark-bar { width: 100%; background: rgba(255,255,255,0.05); border-radius: 4px; min-height: 2px; }
-        .spark-bar.active { background: var(--accent); opacity: 0.7; }
+        #sleep-screen { position: fixed; inset: 0; background: #000; z-index: 50000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     </style>
 </head>
-<body onload="initSystem()">
+<body onload="bootOS()">
 
     <!-- Sleep Lock -->
-    <div id="sleep-lock">
-        <h1 style="font-family:'Lexend'; color:#EA4335;">⚠️ TIME FOR SLEEP</h1>
-        <p style="color:#555; line-height:1.6; margin-top:15px;">Recovery window active.<br>System opens at 07:00 AM.</p>
+    <div id="sleep-screen">
+        <div style="font-size: 40px; margin-bottom: 20px;">🌙</div>
+        <h1 style="font-family:'Lexend'; color: var(--accent);">SYSTEM RECOVERY</h1>
+        <p style="color: #444;">Protocol resumes at 07:00 AM</p>
     </div>
 
-    <div id="toast-container" style="position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 10000;"></div>
-
-    <header style="padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);">
-        <div style="font-family:'Lexend'; font-size: 20px; font-weight: 900;">s<span style="color:var(--accent)">Xam</span> OS <small style="font-size: 10px; color:#444;">v21</small></div>
-        <div id="status-tag" style="font-size: 9px; font-weight: 900; color: #34A853;">SYSTEM: ACTIVE</div>
-    </header>
+    <!-- Header -->
+    <div class="header-section">
+        <div id="timer-label">MISSION STATUS</div>
+        <div id="countdown-timer" class="pulse">00:00:00</div>
+        <div style="display: flex; justify-content: center; gap: 10px; align-items: center;">
+            <div class="xp-badge" id="rank-tag">APPRENTICE</div>
+            <div style="font-size: 10px; font-weight: 900; color: #555;" id="xp-tag">XP 0</div>
+        </div>
+    </div>
 
     <main>
         <!-- Home Dashboard -->
         <div id="tab-home" class="tab-content active">
             <div class="bento-grid">
-                <div class="bento-card wide glass" style="text-align: center;">
-                    <div id="greeting" style="font-size: 9px; font-weight: 900; letter-spacing: 2px; color: #555;">NEURAL CORE READY</div>
-                    <div id="timer-clock" style="font-family: 'Lexend'; font-size: 45px; font-weight: 900; letter-spacing: -2px;">00:00:00</div>
-                    <div id="lvl-display" style="color: var(--accent); font-size: 11px; font-weight: 900; margin-top: 5px;">LEVEL 1 ARCHITECT</div>
-                    <div style="width:100%; height:4px; background:rgba(255,255,255,0.05); border-radius:10px; margin-top:10px;">
-                        <div id="xp-bar" style="height:100%; background:var(--accent); width:0%; transition:1s;"></div>
-                    </div>
-                    <div id="sparkline" style="display:flex; align-items:flex-end; gap:5px; height:25px; margin-top:15px;"></div>
+                <div class="glass-panel wide" style="padding: 25px;">
+                    <div style="font-size: 11px; font-weight: 900; color: var(--accent); margin-bottom: 20px; letter-spacing: 1px;">ACTIVE PROTOCOLS</div>
+                    <div id="protocol-list"></div>
+                    <button onclick="openSettings()" style="width: 100%; background: none; border: 1px dashed #333; color: #444; padding: 16px; border-radius: 20px; font-weight: 800; font-size: 11px; margin-top: 15px;">+ MANAGE PROTOCOLS</button>
                 </div>
 
-                <div class="bento-card tall glass" style="align-items: center; justify-content: center;">
-                    <div style="position: relative; width: 100px; height: 100px;">
-                        <svg width="100" height="100">
-                            <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"></circle>
-                            <circle cx="50" cy="50" r="48" class="ring-bar" id="ring"></circle>
-                        </svg>
-                        <div style="position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-family:'Lexend'; font-weight:900; font-size:20px;" id="pct-val">0%</div>
-                    </div>
-                    <div style="font-size: 10px; font-weight: 900; color: #555; margin-top: 25px;">DISCIPLINE</div>
+                <div class="glass-panel" style="text-align: center; padding: 22px;">
+                    <div style="font-size: 32px; font-weight: 900; font-family: 'Lexend';" id="stat-streak">0</div>
+                    <div style="font-size: 9px; font-weight: 900; color: #444; margin-top: 5px; letter-spacing: 1px;">STREAK</div>
                 </div>
 
-                <div class="bento-card glass" style="align-items: center; justify-content: center;">
-                    <div style="font-size: 32px; font-weight: 900; color: var(--accent);" id="streak-val">0</div>
-                    <div style="font-size: 10px; font-weight: 900; color: #555;">STREAK</div>
-                </div>
-
-                <div class="bento-card wide glass">
-                    <div style="font-size: 10px; font-weight: 900; color: #fff; margin-bottom:15px; letter-spacing: 1px;">ACTIVE PROTOCOLS</div>
-                    <div id="task-container"></div>
+                <div class="glass-panel" style="text-align: center; padding: 22px;">
+                    <div style="font-size: 32px; font-weight: 900; font-family: 'Lexend';" id="stat-lvl">1</div>
+                    <div style="font-size: 9px; font-weight: 900; color: #444; margin-top: 5px; letter-spacing: 1px;">LEVEL</div>
                 </div>
             </div>
         </div>
 
-        <!-- Battlefield Tab -->
+        <!-- Battlefield -->
         <div id="tab-battle" class="tab-content">
             <div style="padding: 25px;">
-                <div style="font-family:'Lexend'; font-size: 18px; font-weight: 900;">BATTLEFIELD</div>
+                <div style="font-family: 'Lexend'; font-size: 20px; font-weight: 900;">BATTLEFIELD</div>
+                <div style="font-size: 10px; font-weight: 800; color: #444; margin-top: 5px;">CHRONICLE YOUR VICTORIES</div>
                 <div class="cal-grid" id="cal-grid"></div>
-                <div style="margin-top: 30px; padding: 20px; border-radius: 22px; background: rgba(255,255,255,0.02); border: 1px solid var(--border);">
-                    <div style="font-size: 11px; font-weight: 900; color: #FBBC05;">ARCHITECT'S NOTE</div>
-                    <p style="font-size: 13px; color: #888; line-height: 1.6; margin-top: 8px;">Discipline is the fuel for greatness. Every green day is a victory.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Library Tab -->
-        <div id="tab-lib" class="tab-content">
-            <div style="padding: 25px;">
-                <div style="font-family:'Lexend'; font-size: 18px; font-weight: 900;">MIRROR VAULT</div>
-                <div style="margin-top: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;" id="photo-grid">
-                    <div onclick="document.getElementById('vault-up').click()" style="height: 100px; border: 2px dashed #222; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: #444;"><i class="fas fa-camera"></i></div>
-                </div>
-                <input type="file" id="vault-up" style="display:none" onchange="saveToVault(this)">
-                
-                <div style="font-family:'Lexend'; font-size: 18px; font-weight: 900; margin-top: 40px;">KNOWLEDGE BASE</div>
-                <div id="lib-container" style="margin-top: 15px;"></div>
             </div>
         </div>
     </main>
 
+    <!-- Journal Modal -->
+    <div class="modal-overlay" id="journal-modal">
+        <div class="modal-content">
+            <div id="modal-date" style="font-family:'Lexend'; font-weight:900; color: var(--accent); font-size: 18px;">Date</div>
+            <textarea id="journal-input" placeholder="Architect, record your progress..."></textarea>
+            <button onclick="saveNote()" style="width:100%; background: var(--accent); border:none; padding:18px; border-radius:20px; font-weight:900; margin-top:20px; color: #000;">LOG TO ARCHIVE</button>
+            <button onclick="closeModal()" style="width:100%; background: none; border:none; color: #444; margin-top: 10px; font-weight: 700;">DISMISS</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal (Protocol Manager) -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
+            <h3 style="font-family:'Lexend'; margin-bottom: 20px;">PROTOCOL MANAGER</h3>
+            <div id="settings-task-list"></div>
+            <hr style="border: 0; border-top: 1px solid #222; margin: 25px 0;">
+            <div style="font-size: 11px; font-weight: 900; color: var(--accent); margin-bottom: 10px;">ADD NEW PROTOCOL</div>
+            <input type="text" id="new-task-name" class="st-input" placeholder="Protocol Name" style="margin-top:0;">
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="new-task-start" class="st-input" placeholder="Start (e.g. 0700)">
+                <input type="number" id="new-task-end" class="st-input" placeholder="End (e.g. 0900)">
+            </div>
+            <button onclick="addNewTask()" style="width:100%; background: #fff; color:#000; border:none; padding:18px; border-radius:20px; font-weight:900; margin-top:20px;">ADD TO SYSTEM</button>
+            <button onclick="closeModal()" style="width:100%; background: none; border:none; color: #444; margin-top: 10px; font-weight: 700;">EXIT SETTINGS</button>
+        </div>
+    </div>
+
+    <!-- Navigation Dock -->
     <nav class="dock">
-        <div class="nav-icon active" onclick="switchTab('home', this)"><i class="fas fa-home"></i></div>
-        <div class="nav-icon" onclick="switchTab('battle', this)"><i class="fas fa-calendar-check"></i></div>
-        <div class="nav-icon" onclick="switchTab('lib', this)"><i class="fas fa-book-open"></i></div>
+        <div class="nav-btn active" onclick="switchTab('home', this)"><i class="fas fa-ghost"></i></div>
+        <div class="nav-btn" onclick="switchTab('battle', this)"><i class="fas fa-calendar-alt"></i></div>
+        <div class="nav-btn" onclick="openSettings()"><i class="fas fa-sliders-h"></i></div>
     </nav>
 
     <script>
-        const State = {
-            xp: parseInt(localStorage.getItem('v21_xp')) || 0,
-            tasks: [
-                { id: 'm1', t: 'Drink Warm Water', s: 700, e: 1100, note: 'Lukewarm water' },
-                { id: 'm2', t: 'Face Cream Time', s: 710, e: 1110, note: 'Pimple Removing Cream' },
-                { id: 'm3', t: 'Go to Toilet', s: 715, e: 1500, note: 'Clear You Stumic' },
-                { id: 'd1', t: 'Hydration Cycle ⏱️', s: 0, e: 2400, note: 'Water every 2-3 hours' },
-                { id: 'e1', t: 'Face Wash', s: 2030, e: 2230, note: 'Wash away day dirt' },
-                { id: 'e2', t: 'Niacinamide 10% ', s: 2035, e: 2230, note: 'Pat, do not rub' },
-                { id: 'e3', t: 'Moisturize', s: 2045, e: 2230, note: 'Lock in healing' },
-                { id: 'e4', t: 'Pillowcase Check 🛌', s: 2100, e: 2230, note: 'Clean bedding' }
-            ]
+        const OS = {
+            xp: parseInt(localStorage.getItem('os_xp')) || 0,
+            protocols: [
+                { id: 'p1', t: 'Warm Water Intake', s: 700, e: 900 },
+                { id: 'p2', t: 'Morning Skincare', s: 710, e: 910 },
+                { id: 'p3', t: 'Focus Work Session', s: 1000, e: 1400 },
+                { id: 'p4', t: 'Hydration Cycle', s: 0, e: 2359 },
+                { id: 'p5', t: 'Night Wash & Serum', s: 2030, e: 2230 },
+                { id: 'p6', t: 'Sleep Protocol', s: 2200, e: 2230 }
+            ],
+            history: JSON.parse(localStorage.getItem('os_history') || "{}"),
+            notes: JSON.parse(localStorage.getItem('os_notes') || "{}"),
+            selectedDate: null
         };
 
-        function initSystem() {
-            checkDailyReset();
-            updateTheme();
-            renderTasks();
+        function bootOS() {
+            // Load saved protocols
+            const savedP = localStorage.getItem('os_protocols');
+            if(savedP) OS.protocols = JSON.parse(savedP);
+
+            // Legacy XP migration
+            const legacyXP = localStorage.getItem('v21_xp');
+            if(legacyXP && !localStorage.getItem('os_xp')) OS.xp = parseInt(legacyXP);
+
+            renderProtocols();
             renderXP();
+            updateClock();
+            setInterval(updateClock, 1000);
+            checkDailyReset();
+        }
+
+        // --- COUNTDOWN LOGIC ---
+        function updateClock() {
+            const now = new Date();
+            const time = now.getHours() * 100 + now.getMinutes();
+            
+            document.getElementById('sleep-screen').style.display = (time >= 2230 || time < 700) ? 'flex' : 'none';
+
+            let next = OS.protocols.find(p => p.s > time);
+            let active = OS.protocols.find(p => time >= p.s && time < p.e && p.id !== 'p4');
+
+            const clock = document.getElementById('countdown-timer');
+            const label = document.getElementById('timer-label');
+
+            let target;
+            if(active) {
+                label.innerText = "PROTOCOL ACTIVE ENDS IN";
+                target = active.e;
+            } else if(next) {
+                label.innerText = "NEXT PROTOCOL STARTS IN";
+                target = next.s;
+            } else {
+                label.innerText = "SYSTEM REBOOT IN";
+                target = 700;
+            }
+            clock.innerText = getTimer(target);
+        }
+
+        function getTimer(target) {
+            const now = new Date();
+            let tDate = new Date();
+            tDate.setHours(Math.floor(target/100), target%100, 0);
+            if(tDate < now) tDate.setDate(tDate.getDate() + 1);
+            let diff = tDate - now;
+            let h = Math.floor(diff/3600000);
+            let m = Math.floor((diff%3600000)/60000);
+            let s = Math.floor((diff%60000)/1000);
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+        // --- PROTOCOL MGMT ---
+        function renderProtocols() {
+            const list = document.getElementById('protocol-list');
+            list.innerHTML = OS.protocols.map(p => {
+                const isDone = localStorage.getItem(`os_p_${p.id}_${new Date().toDateString()}`);
+                return `
+                    <div class="task-card ${isDone ? 'done' : ''}">
+                        <div class="task-checkbox ${isDone ? 'checked' : ''}" onclick="toggleProtocol('${p.id}')">
+                            ${isDone ? '<i class="fas fa-check" style="color:black; font-size:10px;"></i>' : ''}
+                        </div>
+                        <div style="margin-left:15px; flex:1;">
+                            <div style="font-size:14px; font-weight:700;">${p.t}</div>
+                            <div style="font-size:9px; font-weight:900; color:var(--accent); margin-top:2px;">${formatTime(p.s)} - ${formatTime(p.e)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
             updateProgress();
-            renderSparkline();
-            renderLibrary();
-            renderVault();
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('timer-clock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
-                checkSystemLock(now);
-                checkFizzing(now);
-            }, 1000);
+        }
+
+        function toggleProtocol(id) {
+            const d = new Date().toDateString();
+            if(localStorage.getItem(`os_p_${id}_${d}`)) {
+                localStorage.removeItem(`os_p_${id}_${d}`);
+            } else {
+                localStorage.setItem(`os_p_${id}_${d}`, 'true');
+                OS.xp += 25;
+                confetti({ particleCount: 40, spread: 50, colors: ['#4285F4'] });
+            }
+            saveState();
+            renderProtocols();
+            renderXP();
+        }
+
+        function openSettings() {
+            const list = document.getElementById('settings-task-list');
+            list.innerHTML = OS.protocols.map(p => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; background:rgba(255,255,255,0.02); margin-bottom:10px; border-radius:18px; border:1px solid #222;">
+                    <div>
+                        <div style="font-size:14px; font-weight:700;">${p.t}</div>
+                        <div style="font-size:10px; color:#555;">${formatTime(p.s)} - ${formatTime(p.e)}</div>
+                    </div>
+                    <i class="fas fa-trash-alt" style="color:#EA4335; padding:10px;" onclick="deleteTask('${p.id}')"></i>
+                </div>
+            `).join('');
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+
+        function addNewTask() {
+            const name = document.getElementById('new-task-name').value;
+            const start = parseInt(document.getElementById('new-task-start').value);
+            const end = parseInt(document.getElementById('new-task-end').value);
+
+            if(name && !isNaN(start)) {
+                OS.protocols.push({ id: 'p' + Date.now(), t: name, s: start, e: end || 2359 });
+                OS.protocols.sort((a,b) => a.s - b.s);
+                localStorage.setItem('os_protocols', JSON.stringify(OS.protocols));
+                renderProtocols();
+                openSettings();
+                document.getElementById('new-task-name').value = '';
+            }
+        }
+
+        function deleteTask(id) {
+            OS.protocols = OS.protocols.filter(p => p.id !== id);
+            localStorage.setItem('os_protocols', JSON.stringify(OS.protocols));
+            renderProtocols();
+            openSettings();
+        }
+
+        // --- BATTLEFIELD & NOTES ---
+        function renderCalendar() {
+            const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
+            const now = new Date();
+            const days = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+            for(let i=1; i<=days; i++) {
+                const date = new Date(now.getFullYear(), now.getMonth(), i).toDateString();
+                const dayEl = document.createElement('div');
+                dayEl.className = `day-box ${date === now.toDateString() ? 'active' : ''}`;
+                if(OS.history[date] >= 85) dayEl.classList.add('win');
+                if(OS.notes[date]) dayEl.classList.add('has-note');
+                dayEl.innerText = i;
+                dayEl.onclick = () => openJournal(date);
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function openJournal(date) {
+            OS.selectedDate = date;
+            document.getElementById('modal-date').innerText = date;
+            document.getElementById('journal-input').value = OS.notes[date] || "";
+            document.getElementById('journal-modal').style.display = 'flex';
+        }
+
+        function saveNote() {
+            const val = document.getElementById('journal-input').value;
+            OS.notes[OS.selectedDate] = val;
+            saveState();
+            renderCalendar();
+            closeModal();
+        }
+
+        // --- HELPERS ---
+        function formatTime(t) { return Math.floor(t/100) + ":" + (t%100).toString().padStart(2,'0'); }
+        function saveState() {
+            localStorage.setItem('os_xp', OS.xp);
+            localStorage.setItem('os_notes', JSON.stringify(OS.notes));
+            localStorage.setItem('os_history', JSON.stringify(OS.history));
+        }
+
+        function renderXP() {
+            const lvl = Math.floor(OS.xp / 500) + 1;
+            document.getElementById('stat-lvl').innerText = lvl;
+            document.getElementById('xp-tag').innerText = `XP ${OS.xp}`;
+            const ranks = ["APPRENTICE", "ELITE", "ARCHITECT", "COMMANDER", "LEGEND"];
+            document.getElementById('rank-tag').innerText = ranks[Math.min(Math.floor(lvl/5), 4)];
+        }
+
+        function updateProgress() {
+            const d = new Date().toDateString();
+            const done = OS.protocols.filter(p => localStorage.getItem(`os_p_${p.id}_${d}`)).length;
+            const pct = Math.round((done / OS.protocols.length) * 100) || 0;
+            OS.history[d] = pct;
+            saveState();
+
+            let streak = 0, check = new Date();
+            if(pct < 100) check.setDate(check.getDate() - 1);
+            while(OS.history[check.toDateString()] >= 100) { streak++; check.setDate(check.getDate() - 1); }
+            document.getElementById('stat-streak').innerText = streak;
         }
 
         function switchTab(tab, el) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
             el.classList.add('active');
             if(tab === 'battle') renderCalendar();
         }
 
-        function checkSystemLock(now) {
-            const time = now.getHours() * 100 + now.getMinutes();
-            document.getElementById('sleep-lock').style.display = (time >= 2230 || time < 700) ? 'flex' : 'none';
-        }
-
-        function checkFizzing(now) {
-            const time = now.getHours() * 100 + now.getMinutes();
-            State.tasks.forEach(task => {
-                const el = document.getElementById(`item-${task.id}`);
-                if (!el) return;
-                if ((task.e !== 2400 && time > task.e) || (time < task.s && task.s !== 0)) el.classList.add('fizzed');
-                else el.classList.remove('fizzed');
-            });
-        }
-
-        function renderTasks() {
-            const container = document.getElementById('task-container');
-            const now = new Date();
-            const time = now.getHours() * 100 + now.getMinutes();
-            container.innerHTML = State.tasks.map(task => {
-                const done = localStorage.getItem('v21_task_' + task.id) === 'true';
-                const isPriority = (time >= task.s && time <= task.e && !done);
-                return `
-                    <div class="task-item ${done ? 'checked' : ''} ${isPriority ? 'priority' : ''}" id="item-${task.id}">
-                        <input type="checkbox" ${done ? 'checked' : ''} onchange="toggleTask('${task.id}', this.checked)">
-                        <div style="margin-left:15px; flex:1;">
-                            <div style="font-size:14px; font-weight:700;">${task.t}</div>
-                            <div style="font-size:10px; color:var(--accent); font-weight:800; margin-top:2px;">${task.note}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function toggleTask(id, isChecked) {
-            localStorage.setItem('v21_task_' + id, isChecked);
-            const today = new Date().toDateString();
-            if(isChecked && !localStorage.getItem(`v21_xp_${id}_${today}`)) {
-                State.xp += 25;
-                localStorage.setItem('v21_xp', State.xp);
-                localStorage.setItem(`v21_xp_${id}_${today}`, 'true');
-                renderXP();
-            }
-            renderTasks();
-            updateProgress();
-        }
-
-        function updateProgress() {
-            const done = State.tasks.filter(t => localStorage.getItem('v21_task_' + t.id) === 'true').length;
-            const pct = Math.round((done / State.tasks.length) * 100) || 0;
-            document.getElementById('ring').style.strokeDashoffset = 301.59 - (301.59 * pct) / 100;
-            document.getElementById('pct-val').innerText = pct + "%";
-            const history = JSON.parse(localStorage.getItem('v21_history') || "{}");
-            history[new Date().toDateString()] = pct;
-            localStorage.setItem('v21_history', JSON.stringify(history));
-            
-            let streak = 0, check = new Date();
-            if (pct !== 100) check.setDate(check.getDate() - 1);
-            while(history[check.toDateString()] === 100) { streak++; check.setDate(check.getDate() - 1); }
-            document.getElementById('streak-val').innerText = streak;
-            if(pct === 100 && localStorage.getItem('v21_done_today') !== new Date().toDateString()) {
-                confetti({ particleCount: 150, spread: 70 });
-                localStorage.setItem('v21_done_today', new Date().toDateString());
-            }
-        }
-
-        function renderCalendar() {
-            const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
-            const history = JSON.parse(localStorage.getItem('v21_history') || "{}");
-            const now = new Date();
-            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            for(let i=1; i<=daysInMonth; i++) {
-                const d = new Date(now.getFullYear(), now.getMonth(), i).toDateString();
-                const dayEl = document.createElement('div');
-                dayEl.className = 'day';
-                if(history[d] === 100) dayEl.classList.add('green');
-                else if(new Date(d) < new Date().setHours(0,0,0,0)) dayEl.classList.add('red');
-                dayEl.innerText = i;
-                grid.appendChild(dayEl);
-            }
-        }
-
-        function renderSparkline() {
-            const history = JSON.parse(localStorage.getItem('v21_history') || "{}");
-            const container = document.getElementById('sparkline'); container.innerHTML = '';
-            for(let i=6; i>=0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const val = history[d.toDateString()] || 0;
-                const bar = document.createElement('div');
-                bar.className = `spark-bar ${val === 100 ? 'active' : ''}`;
-                bar.style.height = Math.max(2, (val * 0.25)) + 'px';
-                container.appendChild(bar);
-            }
-        }
-
-        function renderLibrary() {
-            document.getElementById('lib-container').innerHTML = State.tasks.map(t => `
-                <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:18px; border:1px solid var(--border); margin-bottom:10px;">
-                    <div style="font-weight:800; color:var(--accent); font-size:13px;">${t.t}</div>
-                    <p style="font-size:11px; color:#666; margin-top:5px; line-height:1.4;">${t.note}. Execution time: ${Math.floor(t.s/100)}:00 - ${Math.floor(t.e/100)}:00</p>
-                </div>
-            `).join('');
-        }
-
-        function saveToVault(input) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                let photos = JSON.parse(localStorage.getItem('v21_vault') || "[]");
-                photos.unshift(e.target.result);
-                if(photos.length > 9) photos.pop();
-                localStorage.setItem('v21_vault', JSON.stringify(photos));
-                renderVault();
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-
-        function renderVault() {
-            const grid = document.getElementById('photo-grid');
-            const photos = JSON.parse(localStorage.getItem('v21_vault') || "[]");
-            grid.innerHTML = `<div onclick="document.getElementById('vault-up').click()" style="height: 100px; border: 2px dashed #222; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: #444;"><i class="fas fa-camera"></i></div>`;
-            photos.forEach(p => grid.innerHTML += `<div style="height: 100px; border-radius: 15px; overflow:hidden; background: url('${p}') center/cover;"></div>`);
-        }
-
-        function renderXP() {
-            const lvl = Math.floor(State.xp / 100) + 1;
-            document.getElementById('lvl-display').innerText = `LEVEL ${lvl} ARCHITECT`;
-            document.getElementById('xp-bar').style.width = (State.xp % 100) + "%";
+        function closeModal() { 
+            document.getElementById('journal-modal').style.display = 'none'; 
+            document.getElementById('settings-modal').style.display = 'none'; 
         }
 
         function checkDailyReset() {
+            const last = localStorage.getItem('os_last_run');
             const today = new Date().toDateString();
-            if (localStorage.getItem('v21_last_date') !== today) {
-                State.tasks.forEach(t => localStorage.removeItem('v21_task_' + t.id));
-                localStorage.setItem('v21_last_date', today);
+            if(last !== today) {
+                localStorage.setItem('os_last_run', today);
+                location.reload();
             }
-        }
-
-        function updateTheme() {
-            const hr = new Date().getHours();
-            let accent = '#4285F4';
-            if(hr >= 5 && hr < 11) accent = '#FBBC05';
-            else if(hr >= 18 && hr < 22) accent = '#34A853';
-            else if(hr >= 22 || hr < 5) accent = '#8AB4F8';
-            document.documentElement.style.setProperty('--accent', accent);
         }
     </script>
 </body>
- </html>
+</html>
